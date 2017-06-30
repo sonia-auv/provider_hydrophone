@@ -23,10 +23,16 @@ namespace provider_hydrophone
         void setThreshold(unsigned int threshold);
         void setGain(unsigned int gain);
 
+        bool isAcquiringData();
+        void startAcquireData();
+        void stopAcquireData();
+
+
 
     private:
 
         int tty = 0;
+        bool acquiringData = false;
 
         bool connect(char* deviceTty);
         void configurePortSetting();

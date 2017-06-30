@@ -19,6 +19,8 @@ namespace provider_hydrophone
 
         configurePortSetting();
 
+        // Be sure
+
     }
 
     HydroUsbDriver::~HydroUsbDriver() {
@@ -66,6 +68,8 @@ namespace provider_hydrophone
 
         if (!isConnected())
             return;
+
+        stopAcquireData();
 
         close(tty);
 
@@ -139,6 +143,35 @@ namespace provider_hydrophone
             return std::string(read_buffer);
         else
             return NULL;
+    }
+
+    bool HydroUsbDriver::isAcquiringData() {
+        return acquiringData;
+    }
+
+    void HydroUsbDriver::startAcquireData() {
+
+        if (isAcquiringData())
+            return;
+
+        writeData("3\r");// TODO Const
+
+        acquiringData = true;
+
+    }
+
+    void HydroUsbDriver::stopAcquireData() {
+
+        if (!isAcquiringData())
+            return;
+
+        writeData("q");// TODO Const
+
+        //std::cout<< "Size : " << readData(2000).size(); // TODO While no data?
+
+        //writeData("s");// TODO Const
+
+        acquiringData = false;
     }
 
 }
