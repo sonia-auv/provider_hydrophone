@@ -39,11 +39,16 @@ namespace provider_hydrophone {
           driver("/dev/ttyUSB0")
     {
 
+        driver.setThreshold(2);
+        driver.setGain(7);
+
     }
 
     //------------------------------------------------------------------------------
     //
-    ProviderHydrophoneNode::~ProviderHydrophoneNode() {}
+    ProviderHydrophoneNode::~ProviderHydrophoneNode() {
+        driver.closeConnection();
+    }
 
     //==============================================================================
     // M E T H O D   S E C T I O N

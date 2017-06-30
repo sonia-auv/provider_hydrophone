@@ -19,26 +19,6 @@ namespace provider_hydrophone
 
         configurePortSetting();
 
-
-        writeData("4\r");
-
-        readData(200);
-
-        writeData("2");
-
-        readData(200);
-
-        // Setting gain
-//        writeData("5\r");
-//
-//        readData(200);
-//
-//        writeData("7");
-//
-//        readData(200);
-
-        closeConnection();
-
     }
 
     HydroUsbDriver::~HydroUsbDriver() {
@@ -97,18 +77,35 @@ namespace provider_hydrophone
 
     void HydroUsbDriver::setThreshold(unsigned int threshold) {
 
+        // TODO Check argument validation
+
         // TODO If aquisition mode, quit
 
-        // set threshold
+        writeData("4\r");  // TODO Use constant
+
+        readData(200);
+
+        writeData(std::to_string(threshold));
+
+        readData(200);
 
         // TODO If was in aquisition mode, restart
 
     }
 
     void HydroUsbDriver::setGain(unsigned int gain) {
-// TODO If aquisition mode, quit
 
-        // Set gain
+        // TODO Check argument validation
+
+        // TODO If aquisition mode, quit
+
+        writeData("5\r");  // TODO Use constant
+
+        readData(200);
+
+        writeData(std::to_string(gain));
+
+        readData(200);
 
         // TODO If was in aquisition mode, restart
     }
