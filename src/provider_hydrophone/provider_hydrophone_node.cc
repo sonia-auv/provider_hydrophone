@@ -35,66 +35,9 @@ namespace provider_hydrophone {
     //------------------------------------------------------------------------------
     //
     ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
-        : nh_(nh)
+        : nh_(nh),
+          driver("/dev/ttyUSB0")
     {
-
-        int fd ;
-        fd = open("/dev/ttyUSB0",O_RDWR | O_NOCTTY);
-
-        if (fd == -1)
-        {
-            printf("\n  Error! in Opening ttyUSB0\n");
-        }
-        else
-            printf("\n  ttyUSB0 Opened Successfully\n");
-
-        struct termios SerialPortSettings;
-
-        tcgetattr(fd, &SerialPortSettings);
-
-        cfsetispeed(&SerialPortSettings,B460800);
-        cfsetospeed(&SerialPortSettings,B460800);
-
-        cfmakeraw(&SerialPortSettings);
-        SerialPortSettings.c_iflag |= ICRNL;
-        tcsetattr(fd,TCSANOW,&SerialPortSettings);
-
-        std::string write_buffer = "4\r";
-
-        int  bytes_written  =  0 ;
-
-        std::cout << "Size : " << write_buffer.length() << std::endl;
-
-        bytes_written = write(fd,write_buffer.c_str(),write_buffer.length());
-
-        std::cout << bytes_written << " bytes wrote" << std::endl;
-
-        char read_buffer[200];
-        int  bytes_read = 0;
-
-        bytes_read = read(fd,&read_buffer,sizeof(read_buffer));
-
-        std::cout << bytes_read << " bytes readed" << std::endl;
-
-        std::cout << "Readed buffer : " << std::string(read_buffer) << std::endl;
-
-        std::string write_buffer2 = "2";
-
-        bytes_written = write(fd,write_buffer2.c_str(),write_buffer2.length());
-
-        std::cout << bytes_written << " bytes wrote" << std::endl;
-
-        char read_buffer2[200];
-
-        bytes_read = read(fd,&read_buffer2,sizeof(read_buffer2));
-
-        std::cout << bytes_read << " bytes readed" << std::endl;
-
-        std::cout << "Readed buffer2 : " << read_buffer2 << std::endl;
-
-        close(fd);
-
-        std::cout << "Connection closed" << std::endl;
 
     }
 

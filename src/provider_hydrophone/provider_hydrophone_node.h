@@ -27,6 +27,7 @@
 #define PROVIDER_HYDROPHONE_PROVIDER_HYDROPHONE_NODE_H_
 
 #include <ros/node_handle.h>
+#include "drivers/HydroUsbDriver.h"
 
 namespace provider_hydrophone {
 
@@ -49,6 +50,8 @@ class ProviderHydrophoneNode {
 
 private:
     ros::NodeHandlePtr nh_;
+
+    HydroUsbDriver driver;
 
 };
 
