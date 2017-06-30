@@ -8,6 +8,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "HydroUsbDriver.h"
+#include <boost/algorithm/string.hpp>
 
 namespace provider_hydrophone
 {
@@ -60,7 +61,7 @@ namespace provider_hydrophone
         cfsetospeed(&SerialPortSettings,B460800);
 
         cfmakeraw(&SerialPortSettings);
-        SerialPortSettings.c_iflag |= ICRNL;
+        SerialPortSettings.c_iflag |= IGNCR;//ICRNL;
         tcsetattr(tty,TCSANOW,&SerialPortSettings);
     }
 
@@ -135,9 +136,9 @@ namespace provider_hydrophone
 
         bytes_read = read(tty,&read_buffer,sizeof(read_buffer));
 
-        std::cout << bytes_read << " bytes readed" << std::endl;
+        //std::cout << bytes_read << " bytes readed" << std::endl;
 
-        std::cout << "Readed buffer : " << std::string(read_buffer) << std::endl;
+        //std::cout << "Readed buffer : " << std::string(read_buffer) << std::endl;
 
         if (bytes_read != -1)
             return std::string(read_buffer);
@@ -172,6 +173,53 @@ namespace provider_hydrophone
         //writeData("s");// TODO Const
 
         acquiringData = false;
+    }
+
+    void HydroUsbDriver::test() {
+
+
+        auto line = readLine();
+
+        std::cout << "Line : " << line << std::endl;
+
+//        auto data = readData(150);
+//
+//        std::vector<std::string> lines;
+//
+//        boost::split(lines, data, boost::is_any_of("\n\n"));
+//
+//        for (auto line : lines)
+//        {
+//            std::cout << "Line : " << line << std::endl;
+//        }
+
+        //std::cout << data << std::endl;
+
+    }
+
+    std::string HydroUsbDriver::readLine() {
+
+        std::string string;
+        std::string lastChar;
+
+        //bool previousWasNewLine = false;
+
+        do{
+
+            //if (lastChar.at(0) == '\n')
+                //previousWasNewLine = true;
+            //else
+
+
+            lastChar = readData(1);
+
+            string += lastChar;
+
+        } while (lastChar.at(0) != '\n');
+
+        string.resize(string.length() - 1);
+
+        return string;
     }
 
 }

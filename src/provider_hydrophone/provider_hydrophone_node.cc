@@ -56,12 +56,14 @@ namespace provider_hydrophone {
     //
     void ProviderHydrophoneNode::Spin() {
 
-        ros::Rate r(0.5);  // 15 hz
+        ros::Rate r(100);  // 15 hz
 
         driver.startAcquireData();
 
         while (ros::ok()) {
             ros::spinOnce();
+
+            driver.test();
 
             r.sleep();
         }

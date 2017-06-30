@@ -27,7 +27,7 @@ namespace provider_hydrophone
         void startAcquireData();
         void stopAcquireData();
 
-
+        void test();
 
     private:
 
@@ -39,6 +39,7 @@ namespace provider_hydrophone
 
         bool writeData(std::string data);
         std::string readData(unsigned int length);
+        std::string readLine();
 
         //--------------------------------------------------------
         //-------------------------CONST--------------------------
