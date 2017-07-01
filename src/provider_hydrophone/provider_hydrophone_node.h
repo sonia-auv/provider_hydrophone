@@ -28,7 +28,7 @@
 
 #include <ros/node_handle.h>
 #include "drivers/HydroUsbDriver.h"
-#include "provider_hydrophone/PingMsg.h"
+#include "provider_hydrophone/PingDebugMsg.h"
 
 namespace provider_hydrophone {
 

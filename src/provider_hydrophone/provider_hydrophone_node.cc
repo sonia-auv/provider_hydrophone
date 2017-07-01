@@ -39,7 +39,7 @@ namespace provider_hydrophone {
           driver("/dev/ttyUSB0")
     {
 
-        pingPublisher = nh_->advertise<provider_hydrophone::PingMsg>("/provider_hydrophone/debug/ping", 100);
+        pingPublisher = nh_->advertise<provider_hydrophone::PingDebugMsg>("/provider_hydrophone/debug/ping", 100);
 
         driver.setThreshold(2);
         driver.setGain(7);
@@ -67,8 +67,6 @@ namespace provider_hydrophone {
 
             handlePing();
 
-            //driver.test();
-            std::cout << "End of while" << std::endl;
             r.sleep();
         }
     }
@@ -91,7 +89,7 @@ namespace provider_hydrophone {
 //            std::cout << "====================================" << std::endl;
 
 
-            provider_hydrophone::PingMsg pingMsg;
+            provider_hydrophone::PingDebugMsg pingMsg;
 
             pingMsg.frequency = ping->getFrequency();
             pingMsg.amplitude = ping->getAmplitude();

@@ -1,0 +1,9 @@
+uint8 frequency
+uint32 amplitude
+uint32 noise
+int32 channelReferenceReal
+int32 channelReferenceImage
+int32 channel1Real
+int32 channel1Image
+int32 channel2Real
+int32 channel2Image

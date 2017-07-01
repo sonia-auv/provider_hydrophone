@@ -42,6 +42,7 @@ find_package(
 
 add_message_files(DIRECTORY msg
         FILES
+        PingDebugMsg.msg
         PingMsg.msg
         )
 
