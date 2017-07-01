@@ -28,6 +28,7 @@
 
 #include <ros/node_handle.h>
 #include "drivers/HydroUsbDriver.h"
+#include "provider_hydrophone/PingMsg.h"
 
 namespace provider_hydrophone {
 
@@ -51,7 +52,11 @@ class ProviderHydrophoneNode {
 private:
     ros::NodeHandlePtr nh_;
 
+    void handlePing();
+
     HydroUsbDriver driver;
+
+    ros::Publisher pingPublisher;
 
 };
 

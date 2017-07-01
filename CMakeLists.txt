@@ -40,13 +40,14 @@ find_package(
 #===============================================================================
 # G E N E R A T E   M E S S A G E S   &   S E R V I C E S
 
-#add_message_files(DIRECTORY msg
-#        FILES
-#        )
+add_message_files(DIRECTORY msg
+        FILES
+        PingMsg.msg
+        )
 
 #add_service_files(DIRECTORY srv FILES )
 
-#generate_messages()
+generate_messages()
 
 catkin_package(
         CATKIN_DEPENDS
@@ -81,7 +82,7 @@ target_link_libraries(${PROJECT_NAME}_node
         yaml-cpp
         )
 
-#add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_generate_messages_cpp)
 
 #==========================================================================
 # U N I T   T E S T S
