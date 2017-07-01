@@ -43,7 +43,7 @@ namespace provider_hydrophone {
         pingPub = nh_->advertise<provider_hydrophone::PingMsg>("/provider_hydrophone/ping", 100);
 
         driver.setThreshold(2);
-        driver.setGain(7);
+        driver.setGain(4);
 
     }
 
