@@ -80,7 +80,7 @@ namespace provider_hydrophone {
 
             sendPingDebug(ping);
 
-
+            sendPing(ping);
 
         }
         else
@@ -104,6 +104,40 @@ namespace provider_hydrophone {
         pingMsg.channel2Image = ping->getChannel2Image();
 
         pingDebugPub.publish(pingMsg);
+    }
+
+    void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
+
+        unsigned int soundSpeed = 1484; //TODO Const
+        double a = 0.015;//TODO Const
+
+        PingMsg pingMsg;
+
+        double phaseRef = atan2(ping->getChannelReferenceImage(), ping->getChannelReferenceReal());
+        double phase1 = atan2(ping->getChannel1Image(), ping->getChannel1Real());
+        double phase2 = atan2(ping->getChannel2Image(), ping->getChannel2Real());
+
+        double dephase1 = phase1 - phaseRef;
+        double dephase2 = phase2 - phaseRef;
+
+        double heading = atan2(dephase1, dephase2);
+
+        unsigned int fullFrequency = ping->getFrequency() * 1000;
+
+        double lambda = soundSpeed / fullFrequency;
+
+
+        double t2 = (dephase2 / (2 * M_PI)) * lambda;
+
+        double elevation = acos(t2/(cos(heading) * a));
+
+
+        pingMsg.frequency = ping->getFrequency();
+        pingMsg.heading = heading;
+        pingMsg.elevation = elevation;
+
+        pingPub.publish(pingMsg);
+
     }
 
 }  // namespace provider_hydrophone

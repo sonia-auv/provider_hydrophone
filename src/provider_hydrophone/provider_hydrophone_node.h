@@ -30,6 +30,7 @@
 #include "drivers/HydroUsbDriver.h"
 #include "provider_hydrophone/PingDebugMsg.h"
 #include "provider_hydrophone/PingMsg.h"
+#include "math.h"
 
 namespace provider_hydrophone {
 
@@ -56,6 +57,7 @@ private:
     void handlePing();
 
     void sendPingDebug(std::shared_ptr<Ping> ping);
+    void sendPing(std::shared_ptr<Ping> ping);
 
     HydroUsbDriver driver;
 
