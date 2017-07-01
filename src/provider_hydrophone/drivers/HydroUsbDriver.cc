@@ -37,7 +37,7 @@ namespace provider_hydrophone
         if (isConnected())
             closeConnection();
 
-        tty = open(deviceTty,O_RDWR | O_NOCTTY);
+        tty = open(deviceTty, O_RDWR | O_NOCTTY);
 
         if (tty == -1)
         {
@@ -61,7 +61,9 @@ namespace provider_hydrophone
         cfsetospeed(&SerialPortSettings,B460800);
 
         cfmakeraw(&SerialPortSettings);
-        SerialPortSettings.c_iflag |= IGNCR;//ICRNL;
+         SerialPortSettings.c_iflag |= IGNCR;//ICRNL;
+        //SerialPortSettings.c_iflag &= ~ICANON;
+        //SerialPortSettings.c_cc[VTIME] = 1
         tcsetattr(tty,TCSANOW,&SerialPortSettings);
     }
 
@@ -88,11 +90,13 @@ namespace provider_hydrophone
 
         writeData("4\r");  // TODO Use constant
 
-        readData(200);
+        std::cout << "Setting threshold data return 1 : " << readData(200) << std::endl;
+        //readData(200);
 
         writeData(std::to_string(threshold));
 
-        readData(200);
+        std::cout << "Setting threshold data return 2 : " << readData(200) << std::endl;
+        //readData(200);
 
         // TODO If was in aquisition mode, restart
 
@@ -106,11 +110,13 @@ namespace provider_hydrophone
 
         writeData("5\r");  // TODO Use constant
 
-        readData(200);
+        std::cout << "Setting gain data return 1 : " << readData(200) << std::endl;
+        //readData(200);
 
         writeData(std::to_string(gain));
 
-        readData(200);
+        std::cout << "Setting gain data return 2 : " << readData(200) << std::endl;
+        //readData(200);
 
         // TODO If was in aquisition mode, restart
     }
