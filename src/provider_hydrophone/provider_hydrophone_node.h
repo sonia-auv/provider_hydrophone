@@ -55,6 +55,8 @@ private:
 
     void handlePing();
 
+    void sendPingDebug(std::shared_ptr<Ping> ping);
+
     HydroUsbDriver driver;
 
     ros::Publisher pingDebugPub;

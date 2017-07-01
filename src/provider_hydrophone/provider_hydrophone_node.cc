@@ -77,32 +77,10 @@ namespace provider_hydrophone {
         auto ping = driver.getPing();
         if (ping != nullptr)
         {
-//            std::cout << "=========We have a ping !===========" << std::endl;
-//            std::cout << "Frequency : " << (int) ping->getFrequency() << "kHz" << std::endl;
-//            std::cout << "Amplitude : " << (int) ping->getAmplitude() << std::endl;
-//            std::cout << "Noise : " << (int) ping->getNoise() << std::endl;
-//            std::cout << "CRR : " << (int) ping->getChannelReferenceReal() << std::endl;
-//            std::cout << "CRI : " << (int) ping->getChannelReferenceImage() << std::endl;
-//            std::cout << "C1R : " << (int) ping->getChannel1Real() << std::endl;
-//            std::cout << "C1I : " << (int) ping->getChannel1Image() << std::endl;
-//            std::cout << "C2R : " << (int) ping->getChannel2Real() << std::endl;
-//            std::cout << "C2I : " << (int) ping->getChannel2Image() << std::endl;
-//            std::cout << "====================================" << std::endl;
+
+            sendPingDebug(ping);
 
 
-            provider_hydrophone::PingDebugMsg pingMsg;
-
-            pingMsg.frequency = ping->getFrequency();
-            pingMsg.amplitude = ping->getAmplitude();
-            pingMsg.noise = ping->getNoise();
-            pingMsg.channelReferenceReal = ping->getChannelReferenceReal();
-            pingMsg.channelReferenceImage = ping->getChannelReferenceImage();
-            pingMsg.channel1Real = ping->getChannel1Real();
-            pingMsg.channel1Image = ping->getChannel1Image();
-            pingMsg.channel2Real = ping->getChannel2Real();
-            pingMsg.channel2Image = ping->getChannel2Image();
-
-            pingDebugPub.publish(pingMsg);
 
         }
         else
@@ -110,6 +88,22 @@ namespace provider_hydrophone {
             std::cout << "!!!!!!!!!!!!We do not have a ping :( ! !!!!!!!!!!!" << std::endl;
         }
 
+    }
+
+    void ProviderHydrophoneNode::sendPingDebug(std::shared_ptr<Ping> ping) {
+        provider_hydrophone::PingDebugMsg pingMsg;
+
+        pingMsg.frequency = ping->getFrequency();
+        pingMsg.amplitude = ping->getAmplitude();
+        pingMsg.noise = ping->getNoise();
+        pingMsg.channelReferenceReal = ping->getChannelReferenceReal();
+        pingMsg.channelReferenceImage = ping->getChannelReferenceImage();
+        pingMsg.channel1Real = ping->getChannel1Real();
+        pingMsg.channel1Image = ping->getChannel1Image();
+        pingMsg.channel2Real = ping->getChannel2Real();
+        pingMsg.channel2Image = ping->getChannel2Image();
+
+        pingDebugPub.publish(pingMsg);
     }
 
 }  // namespace provider_hydrophone
