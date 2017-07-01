@@ -37,7 +37,7 @@ namespace provider_hydrophone
         if (isConnected())
             closeConnection();
 
-        tty = open(deviceTty, O_RDWR | O_NOCTTY);
+        tty = open(deviceTty, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
         if (tty == -1)
         {
@@ -89,12 +89,12 @@ namespace provider_hydrophone
         // TODO If aquisition mode, quit
 
         writeData("4\r");  // TODO Use constant
-
+        usleep(10000); // TODO TEMP Give time to board to execute command
         std::cout << "Setting threshold data return 1 : " << readData(200) << std::endl;
         //readData(200);
-
+        usleep(10000);// TODO TEMP Give time to board to execute command
         writeData(std::to_string(threshold));
-
+        usleep(10000);// TODO TEMP Give time to board to execute command
         std::cout << "Setting threshold data return 2 : " << readData(200) << std::endl;
         //readData(200);
 
@@ -109,12 +109,12 @@ namespace provider_hydrophone
         // TODO If aquisition mode, quit
 
         writeData("5\r");  // TODO Use constant
-
+        usleep(10000);// TODO TEMP Give time to board to execute command
         std::cout << "Setting gain data return 1 : " << readData(200) << std::endl;
         //readData(200);
-
+        usleep(10000);// TODO TEMP Give time to board to execute command
         writeData(std::to_string(gain));
-
+        usleep(10000);// TODO TEMP Give time to board to execute command
         std::cout << "Setting gain data return 2 : " << readData(200) << std::endl;
         //readData(200);
 
@@ -149,7 +149,7 @@ namespace provider_hydrophone
         if (bytes_read != -1)
             return std::string(read_buffer);
         else
-            return NULL;
+            return "";
     }
 
     bool HydroUsbDriver::isAcquiringData() {
@@ -250,9 +250,10 @@ namespace provider_hydrophone
 
             string += lastChar;
 
-        } while (lastChar.at(0) != '\n');
+        } while (lastChar.length() != 0 && lastChar.at(0) != '\n');
 
-        string.resize(string.length() - 1);
+        if (string.length() > 0)
+            string.resize(string.length() - 1);
 
         return string;
     }
