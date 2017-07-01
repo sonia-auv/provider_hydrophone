@@ -56,7 +56,7 @@ private:
 
     HydroUsbDriver driver;
 
-    ros::Publisher pingPublisher;
+    ros::Publisher pingDebugPub;
 
 };
 

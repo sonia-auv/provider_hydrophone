@@ -39,7 +39,7 @@ namespace provider_hydrophone {
           driver("/dev/ttyUSB0")
     {
 
-        pingPublisher = nh_->advertise<provider_hydrophone::PingDebugMsg>("/provider_hydrophone/debug/ping", 100);
+        pingDebugPub = nh_->advertise<provider_hydrophone::PingDebugMsg>("/provider_hydrophone/debug/ping", 100);
 
         driver.setThreshold(2);
         driver.setGain(7);
@@ -101,7 +101,7 @@ namespace provider_hydrophone {
             pingMsg.channel2Real = ping->getChannel2Real();
             pingMsg.channel2Image = ping->getChannel2Image();
 
-            pingPublisher.publish(pingMsg);
+            pingDebugPub.publish(pingMsg);
 
         }
         else
