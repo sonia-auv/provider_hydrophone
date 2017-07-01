@@ -6,6 +6,7 @@
 #define PROVIDER_HYDROPHONE_HYDROUSBDRIVER_H
 
 #include <ros/ros.h>
+#include <regex>
 
 namespace provider_hydrophone
 {

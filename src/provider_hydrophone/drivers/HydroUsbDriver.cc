@@ -181,6 +181,35 @@ namespace provider_hydrophone
         auto line = readLine();
 
         std::cout << "Line : " << line << std::endl;
+        std::smatch matcher;
+        std::regex expression("(\\d*)kHz\\s*(\\d*)\\s*(\\d*)\\s*([-]?\\d*)\\/\\s*([-]?\\d*)\\s*([-]?\\d*)\\/\\s*([-]?\\d*)\\s*([-]?\\d*)\\/\\s*([-]?\\d*)");
+
+        bool searchFound = std::regex_search(line, matcher, expression);
+
+        if (searchFound)
+        {
+            std::cout << "Something Found !!" << std::endl;
+
+            std::cout << "Match : " << matcher[0] << std::endl;
+            std::cout << "Freq : " << matcher[1] << std::endl;
+            std::cout << "Amplitude : " << matcher[2] << std::endl;
+            std::cout << "Noise : " << matcher[3] << std::endl;
+            std::cout << "CRR : " << matcher[4] << std::endl;
+            std::cout << "CRI : " << matcher[5] << std::endl;
+            std::cout << "C1R : " << matcher[6] << std::endl;
+            std::cout << "C1I : " << matcher[7] << std::endl;
+            std::cout << "C2R : " << matcher[8] << std::endl;
+            std::cout << "C2I : " << matcher[9] << std::endl;
+        }
+        else
+        {
+            std::cout << "Nothing Found !! :(" << std::endl;
+        }
+
+
+
+        //for (auto toto : m)
+            //std::cout << "Toto : " << toto << std::endl;
 
 //        auto data = readData(150);
 //

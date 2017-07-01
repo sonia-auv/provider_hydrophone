@@ -56,7 +56,7 @@ namespace provider_hydrophone {
     //
     void ProviderHydrophoneNode::Spin() {
 
-        ros::Rate r(100);  // 15 hz
+        ros::Rate r(400);  // 15 hz
 
         driver.startAcquireData();
 
@@ -64,7 +64,7 @@ namespace provider_hydrophone {
             ros::spinOnce();
 
             driver.test();
-
+            std::cout << "End of while" << std::endl;
             r.sleep();
         }
     }
