@@ -56,14 +56,35 @@ namespace provider_hydrophone {
     //
     void ProviderHydrophoneNode::Spin() {
 
-        ros::Rate r(100);  // 15 hz
+        ros::Rate r(100);  // 100 hz
 
         driver.startAcquireData();
 
         while (ros::ok()) {
             ros::spinOnce();
 
-            driver.test();
+            auto ping = driver.getPing();
+
+            if (ping != nullptr)
+            {
+                std::cout << "=========We have a ping !===========" << std::endl;
+                std::cout << "Frequency : " << (int) ping->getFrequency() << "kHz" << std::endl;
+                std::cout << "Amplitude : " << (int) ping->getAmplitude() << std::endl;
+                std::cout << "Noise : " << (int) ping->getNoise() << std::endl;
+                std::cout << "CRR : " << (int) ping->getChannelReferenceReal() << std::endl;
+                std::cout << "CRI : " << (int) ping->getChannelReferenceImage() << std::endl;
+                std::cout << "C1R : " << (int) ping->getChannel1Real() << std::endl;
+                std::cout << "C1I : " << (int) ping->getChannel1Image() << std::endl;
+                std::cout << "C2R : " << (int) ping->getChannel2Real() << std::endl;
+                std::cout << "C2I : " << (int) ping->getChannel2Image() << std::endl;
+                std::cout << "====================================" << std::endl;
+            }
+            else
+            {
+                std::cout << "!!!!!!!!!!!!We do not have a ping :( ! !!!!!!!!!!!" << std::endl;
+            }
+
+            //driver.test();
             std::cout << "End of while" << std::endl;
             r.sleep();
         }

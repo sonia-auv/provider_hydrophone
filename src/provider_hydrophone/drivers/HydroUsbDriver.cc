@@ -142,10 +142,6 @@ namespace provider_hydrophone
 
         bytes_read = read(tty,&read_buffer,sizeof(read_buffer));
 
-        //std::cout << bytes_read << " bytes readed" << std::endl;
-
-        //std::cout << "Readed buffer : " << std::string(read_buffer) << std::endl;
-
         if (bytes_read != -1)
             return std::string(read_buffer);
         else
@@ -174,62 +170,7 @@ namespace provider_hydrophone
 
         writeData("q");// TODO Const
 
-        //std::cout<< "Size : " << readData(2000).size(); // TODO While no data?
-
-        //writeData("s");// TODO Const
-
         acquiringData = false;
-    }
-
-    void HydroUsbDriver::test() {
-
-
-        auto line = readLine();
-
-        std::cout << "Line : " << line << std::endl;
-        std::smatch matcher;
-        std::regex expression("(\\d*)kHz\\s*(\\d*)\\s*(\\d*)\\s*([-]?\\d*)\\/\\s*([-]?\\d*)\\s*([-]?\\d*)\\/\\s*([-]?\\d*)\\s*([-]?\\d*)\\/\\s*([-]?\\d*)");
-
-        bool searchFound = std::regex_search(line, matcher, expression);
-
-        if (searchFound)
-        {
-            std::cout << "Something Found !!" << std::endl;
-
-            std::cout << "Match : " << matcher[0] << std::endl;
-            std::cout << "Freq : " << matcher[1] << std::endl;
-            std::cout << "Amplitude : " << matcher[2] << std::endl;
-            std::cout << "Noise : " << matcher[3] << std::endl;
-            std::cout << "CRR : " << matcher[4] << std::endl;
-            std::cout << "CRI : " << matcher[5] << std::endl;
-            std::cout << "C1R : " << matcher[6] << std::endl;
-            std::cout << "C1I : " << matcher[7] << std::endl;
-            std::cout << "C2R : " << matcher[8] << std::endl;
-            std::cout << "C2I : " << matcher[9] << std::endl;
-        }
-        else
-        {
-            std::cout << "Nothing Found !! :(" << std::endl;
-        }
-
-
-
-        //for (auto toto : m)
-            //std::cout << "Toto : " << toto << std::endl;
-
-//        auto data = readData(150);
-//
-//        std::vector<std::string> lines;
-//
-//        boost::split(lines, data, boost::is_any_of("\n\n"));
-//
-//        for (auto line : lines)
-//        {
-//            std::cout << "Line : " << line << std::endl;
-//        }
-
-        //std::cout << data << std::endl;
-
     }
 
     std::string HydroUsbDriver::readLine() {
@@ -237,14 +178,7 @@ namespace provider_hydrophone
         std::string string;
         std::string lastChar;
 
-        //bool previousWasNewLine = false;
-
         do{
-
-            //if (lastChar.at(0) == '\n')
-                //previousWasNewLine = true;
-            //else
-
 
             lastChar = readData(1);
 
@@ -256,6 +190,41 @@ namespace provider_hydrophone
             string.resize(string.length() - 1);
 
         return string;
+    }
+
+    std::shared_ptr<Ping> HydroUsbDriver::getPing() {
+
+        auto line = readLine();
+
+        std::cout << "Line : " << line << std::endl;
+        std::smatch matcher;
+        std::regex expression("(\\d+)kHz\\s*(\\d+)\\s*(\\d+)\\s*([-]?\\d+)\\/\\s*([-]?\\d+)\\s*([-]?\\d+)\\/\\s*([-]?\\d+)\\s*([-]?\\d+)\\/\\s*([-]?\\d+)");
+
+        bool searchFound = std::regex_search(line, matcher, expression);
+
+        if (searchFound)
+        {
+
+            std::shared_ptr<Ping> ping(new Ping());
+
+            ping->setFrequency(std::stoi(matcher[1]));
+            ping->setAmplitude(std::stoi(matcher[2]));
+            ping->setNoise(std::stoi(matcher[3]));
+
+            ping->setChannelReferenceReal(std::stoi(matcher[4]));
+            ping->setChannelReferenceImage(std::stoi(matcher[5]));
+
+            ping->setChannel1Real(std::stoi(matcher[6]));
+            ping->setChannel1Image(std::stoi(matcher[7]));
+
+            ping->setChannel2Real(std::stoi(matcher[8]));
+            ping->setChannel2Image(std::stoi(matcher[9]));
+
+            return ping;
+
+        }
+
+        return std::shared_ptr<Ping>(nullptr);
     }
 
 }

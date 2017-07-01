@@ -7,6 +7,7 @@
 
 #include <ros/ros.h>
 #include <regex>
+#include "Ping.h"
 
 namespace provider_hydrophone
 {
@@ -28,7 +29,7 @@ namespace provider_hydrophone
         void startAcquireData();
         void stopAcquireData();
 
-        void test();
+        std::shared_ptr<Ping> getPing();
 
     private:
 
