@@ -42,7 +42,7 @@ namespace provider_hydrophone {
         pingDebugPub = nh_->advertise<provider_hydrophone::PingDebugMsg>("/provider_hydrophone/debug/ping", 100);
         pingPub = nh_->advertise<provider_hydrophone::PingMsg>("/provider_hydrophone/ping", 100);
 
-        driver.setThreshold(2);
+        driver.setThreshold(3);
         driver.setGain(4);
 
     }
@@ -124,7 +124,7 @@ namespace provider_hydrophone {
 
         unsigned int fullFrequency = ping->getFrequency() * 1000;
 
-        double lambda = soundSpeed / fullFrequency;
+        double lambda = (double) soundSpeed / fullFrequency;
 
 
         double t2 = (dephase2 / (2 * M_PI)) * lambda;
