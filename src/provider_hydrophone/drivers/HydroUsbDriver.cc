@@ -89,12 +89,12 @@ namespace provider_hydrophone
         // TODO If aquisition mode, quit
 
         writeData("4\r");  // TODO Use constant
-        usleep(10000); // TODO TEMP Give time to board to execute command
+        usleep(100000); // TODO TEMP Give time to board to execute command
         std::cout << "Setting threshold data return 1 : " << readData(200) << std::endl;
         //readData(200);
-        usleep(10000);// TODO TEMP Give time to board to execute command
-        writeData(std::to_string(threshold));
-        usleep(10000);// TODO TEMP Give time to board to execute command
+        usleep(100000);// TODO TEMP Give time to board to execute command
+        writeData(std::to_string(threshold) + "\r");
+        usleep(100000);// TODO TEMP Give time to board to execute command
         std::cout << "Setting threshold data return 2 : " << readData(200) << std::endl;
         //readData(200);
 
@@ -109,12 +109,12 @@ namespace provider_hydrophone
         // TODO If aquisition mode, quit
 
         writeData("5\r");  // TODO Use constant
-        usleep(10000);// TODO TEMP Give time to board to execute command
+        usleep(100000);// TODO TEMP Give time to board to execute command
         std::cout << "Setting gain data return 1 : " << readData(200) << std::endl;
         //readData(200);
-        usleep(10000);// TODO TEMP Give time to board to execute command
-        writeData(std::to_string(gain));
-        usleep(10000);// TODO TEMP Give time to board to execute command
+        usleep(100000);// TODO TEMP Give time to board to execute command
+        writeData(std::to_string(gain) + "\r");
+        usleep(100000);// TODO TEMP Give time to board to execute command
         std::cout << "Setting gain data return 2 : " << readData(200) << std::endl;
         //readData(200);
 
@@ -158,6 +158,10 @@ namespace provider_hydrophone
             return;
 
         writeData("3\r");// TODO Const
+
+        usleep(100000);// TODO TEMP Give time to board to execute command
+
+        std::cout << "Start acquire data return : " << readData(200) << std::endl;
 
         acquiringData = true;
 
