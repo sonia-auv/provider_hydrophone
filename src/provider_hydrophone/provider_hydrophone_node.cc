@@ -29,115 +29,139 @@
 
 namespace provider_hydrophone {
 
-    //==============================================================================
-    // C / D T O R S   S E C T I O N
+//==============================================================================
+// C / D T O R S   S E C T I O N
 
-    //------------------------------------------------------------------------------
-    //
-    ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
-        : nh_(nh),
-          driver("/dev/ttyUSB0")
+//------------------------------------------------------------------------------
+//
+ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
+    : nh_(nh),
+      driver("/dev/ttyUSB0"),
+      threshold_(3),
+      current_threshold_(3),
+      gain_(4),
+      current_gain_(4) {
+
+  server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
+
+  HydroConfig config;
+  config.Threshold = current_threshold_;
+  config.Gain = current_gain_;
+  CallBackDynamicReconfigure(config, 0);
+
+  pingDebugPub = nh_->advertise<provider_hydrophone::PingDebugMsg>("/provider_hydrophone/debug/ping", 100);
+  pingPub = nh_->advertise<provider_hydrophone::PingMsg>("/provider_hydrophone/ping", 100);
+
+  driver.setThreshold(current_threshold_);
+  driver.setGain(current_gain_);
+}
+
+//------------------------------------------------------------------------------
+//
+ProviderHydrophoneNode::~ProviderHydrophoneNode() {
+    driver.closeConnection();
+}
+
+//==============================================================================
+// M E T H O D   S E C T I O N
+//------------------------------------------------------------------------------
+//
+void ProviderHydrophoneNode::Spin() {
+
+  ros::Rate r(100);  // 100 hz
+
+  driver.startAcquireData();
+
+  while (ros::ok()) {
+    ros::spinOnce();
+
+    if (threshold_ != current_threshold_) {
+      current_threshold_ = threshold_;
+      driver.setThreshold(current_threshold_);
+    }
+
+    if (gain_ != current_gain_) {
+      current_gain_ = gain_;
+      driver.setGain(current_gain_);
+    }
+
+    handlePing();
+
+    r.sleep();
+  }
+}
+
+void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
+{
+  threshold_ = config.Threshold;
+  gain_ = config.Gain;
+}
+
+void ProviderHydrophoneNode::handlePing() {
+
+    auto ping = driver.getPing();
+    if (ping != nullptr)
     {
 
-        pingDebugPub = nh_->advertise<provider_hydrophone::PingDebugMsg>("/provider_hydrophone/debug/ping", 100);
-        pingPub = nh_->advertise<provider_hydrophone::PingMsg>("/provider_hydrophone/ping", 100);
+        sendPingDebug(ping);
 
-        driver.setThreshold(3);
-        driver.setGain(4);
+        sendPing(ping);
 
     }
-
-    //------------------------------------------------------------------------------
-    //
-    ProviderHydrophoneNode::~ProviderHydrophoneNode() {
-        driver.closeConnection();
+    else
+    {
+        std::cout << "!!!!!!!!!!!!We do not have a ping :( ! !!!!!!!!!!!" << std::endl;
     }
 
-    //==============================================================================
-    // M E T H O D   S E C T I O N
-    //------------------------------------------------------------------------------
-    //
-    void ProviderHydrophoneNode::Spin() {
+}
 
-        ros::Rate r(100);  // 100 hz
+void ProviderHydrophoneNode::sendPingDebug(std::shared_ptr<Ping> ping) {
+    provider_hydrophone::PingDebugMsg pingMsg;
 
-        driver.startAcquireData();
+    pingMsg.frequency = ping->getFrequency();
+    pingMsg.amplitude = ping->getAmplitude();
+    pingMsg.noise = ping->getNoise();
+    pingMsg.channelReferenceReal = ping->getChannelReferenceReal();
+    pingMsg.channelReferenceImage = ping->getChannelReferenceImage();
+    pingMsg.channel1Real = ping->getChannel1Real();
+    pingMsg.channel1Image = ping->getChannel1Image();
+    pingMsg.channel2Real = ping->getChannel2Real();
+    pingMsg.channel2Image = ping->getChannel2Image();
 
-        while (ros::ok()) {
-            ros::spinOnce();
+    pingDebugPub.publish(pingMsg);
+}
 
-            handlePing();
+void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
 
-            r.sleep();
-        }
-    }
+    unsigned int soundSpeed = 1484; //TODO Const
+    double a = 0.015;//TODO Const
 
-    void ProviderHydrophoneNode::handlePing() {
+    PingMsg pingMsg;
 
-        auto ping = driver.getPing();
-        if (ping != nullptr)
-        {
+    double phaseRef = atan2(ping->getChannelReferenceImage(), ping->getChannelReferenceReal());
+    double phase1 = atan2(ping->getChannel1Image(), ping->getChannel1Real());
+    double phase2 = atan2(ping->getChannel2Image(), ping->getChannel2Real());
 
-            sendPingDebug(ping);
+    double dephase1 = phase1 - phaseRef;
+    double dephase2 = phase2 - phaseRef;
 
-            sendPing(ping);
+    double heading = atan2(dephase1, dephase2);
 
-        }
-        else
-        {
-            std::cout << "!!!!!!!!!!!!We do not have a ping :( ! !!!!!!!!!!!" << std::endl;
-        }
+    unsigned int fullFrequency = ping->getFrequency() * 1000;
 
-    }
-
-    void ProviderHydrophoneNode::sendPingDebug(std::shared_ptr<Ping> ping) {
-        provider_hydrophone::PingDebugMsg pingMsg;
-
-        pingMsg.frequency = ping->getFrequency();
-        pingMsg.amplitude = ping->getAmplitude();
-        pingMsg.noise = ping->getNoise();
-        pingMsg.channelReferenceReal = ping->getChannelReferenceReal();
-        pingMsg.channelReferenceImage = ping->getChannelReferenceImage();
-        pingMsg.channel1Real = ping->getChannel1Real();
-        pingMsg.channel1Image = ping->getChannel1Image();
-        pingMsg.channel2Real = ping->getChannel2Real();
-        pingMsg.channel2Image = ping->getChannel2Image();
-
-        pingDebugPub.publish(pingMsg);
-    }
-
-    void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
-
-        unsigned int soundSpeed = 1484; //TODO Const
-        double a = 0.015;//TODO Const
-
-        PingMsg pingMsg;
-
-        double phaseRef = atan2(ping->getChannelReferenceImage(), ping->getChannelReferenceReal());
-        double phase1 = atan2(ping->getChannel1Image(), ping->getChannel1Real());
-        double phase2 = atan2(ping->getChannel2Image(), ping->getChannel2Real());
-
-        double dephase1 = phase1 - phaseRef;
-        double dephase2 = phase2 - phaseRef;
-
-        double heading = atan2(dephase1, dephase2);
-
-        unsigned int fullFrequency = ping->getFrequency() * 1000;
-
-        double lambda = (double) soundSpeed / fullFrequency;
+    double lambda = (double) soundSpeed / fullFrequency;
 
 
-        double t2 = (dephase2 / (2 * M_PI)) * lambda;
+    double t2 = (dephase2 / (2 * M_PI)) * lambda;
 
-        double elevation = acos(t2/(cos(heading) * a));
+    double elevation = acos(t2/(cos(heading) * a));
 
 
-        pingMsg.frequency = ping->getFrequency();
-        pingMsg.heading = heading;
-        pingMsg.elevation = elevation;
+    pingMsg.frequency = ping->getFrequency();
+    pingMsg.heading = heading;
+    pingMsg.elevation = elevation;
 
-        pingPub.publish(pingMsg);
-
-    }
+    pingPub.publish(pingMsg);
+}
 
 }  // namespace provider_hydrophone

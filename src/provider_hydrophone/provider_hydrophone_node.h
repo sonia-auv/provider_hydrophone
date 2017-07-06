@@ -27,6 +27,9 @@
 #define PROVIDER_HYDROPHONE_PROVIDER_HYDROPHONE_NODE_H_
 
 #include <ros/node_handle.h>
+#include <dynamic_reconfigure/server.h>
+#include <provider_hydrophone/HydroConfig.h>
+
 #include "drivers/HydroUsbDriver.h"
 #include "provider_hydrophone/PingDebugMsg.h"
 #include "provider_hydrophone/PingMsg.h"
@@ -50,20 +53,27 @@ class ProviderHydrophoneNode {
   /// Each iteration of the loop, this will take the objects in the object
   /// registery, empty it and publish the objects.
   void Spin();
+  void CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level);
 
 private:
-    ros::NodeHandlePtr nh_;
+  ros::NodeHandlePtr nh_;
 
-    void handlePing();
+  dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
 
-    void sendPingDebug(std::shared_ptr<Ping> ping);
-    void sendPing(std::shared_ptr<Ping> ping);
+  void handlePing();
 
-    HydroUsbDriver driver;
+  void sendPingDebug(std::shared_ptr<Ping> ping);
+  void sendPing(std::shared_ptr<Ping> ping);
 
-    ros::Publisher pingDebugPub;
-    ros::Publisher pingPub;
+  HydroUsbDriver driver;
 
+  ros::Publisher pingDebugPub;
+  ros::Publisher pingPub;
+
+  unsigned int threshold_ = 0;
+  unsigned int current_threshold_ = 0;
+  unsigned int gain_ = 0;
+  unsigned int current_gain_ = 0;
 };
 
 }  // namespace provider_hydrophone

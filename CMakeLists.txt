@@ -34,7 +34,11 @@ find_package(
         std_msgs
         message_generation
         message_runtime
+        dynamic_reconfigure
+)
 
+generate_dynamic_reconfigure_options(
+        cfg/HydroReconfig.cfg
 )
 
 #===============================================================================
@@ -83,7 +87,9 @@ target_link_libraries(${PROJECT_NAME}_node
         yaml-cpp
         )
 
-add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(${PROJECT_NAME}_node
+        ${PROJECT_NAME}_generate_messages_cpp
+        ${PROJECT_NAME}_gencfg)
 
 #==========================================================================
 # U N I T   T E S T S
