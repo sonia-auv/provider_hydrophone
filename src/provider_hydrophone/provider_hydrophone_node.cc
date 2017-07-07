@@ -37,10 +37,10 @@ namespace provider_hydrophone {
 ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
     : nh_(nh),
       driver("/dev/ttyUSB0"),
-      threshold_(3),
-      current_threshold_(3),
-      gain_(4),
-      current_gain_(4) {
+      threshold_(4),
+      current_threshold_(4),
+      gain_(2),
+      current_gain_(2) {
 
   server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
 
