@@ -110,7 +110,7 @@ void ProviderHydrophoneNode::handlePing() {
     }
     else
     {
-        std::cout << "!!!!!!!!!!!!We do not have a ping :( ! !!!!!!!!!!!" << std::endl;
+        //std::cout << "!!!!!!!!!!!!We do not have a ping :( ! !!!!!!!!!!!" << std::endl;
     }
 
 }
@@ -118,7 +118,7 @@ void ProviderHydrophoneNode::handlePing() {
 void ProviderHydrophoneNode::sendPingDebug(std::shared_ptr<Ping> ping) {
     provider_hydrophone::PingDebugMsg pingMsg;
 
-    pingMsg.header.stamp = ros::Time();
+    pingMsg.header.stamp = ros::Time::now();
     pingMsg.header.seq = seqDebug++;
 
     pingMsg.frequency = ping->getFrequency();
@@ -141,7 +141,7 @@ void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
 
     PingMsg pingMsg;
 
-    pingMsg.header.stamp = ros::Time();
+    pingMsg.header.stamp = ros::Time::now();
     pingMsg.header.seq = seq++;
 
     double phaseRef = atan2(ping->getChannelReferenceImage(), ping->getChannelReferenceReal());
