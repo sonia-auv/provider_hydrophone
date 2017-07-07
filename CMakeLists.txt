@@ -52,7 +52,7 @@ add_message_files(DIRECTORY msg
 
 #add_service_files(DIRECTORY srv FILES )
 
-generate_messages()
+generate_messages(DEPENDENCIES std_msgs)
 
 catkin_package(
         CATKIN_DEPENDS
