@@ -74,6 +74,10 @@ private:
   unsigned int current_threshold_ = 0;
   unsigned int gain_ = 0;
   unsigned int current_gain_ = 0;
+
+    unsigned int seq = 0;
+    unsigned int seqDebug = 0;
+
 };
 
 }  // namespace provider_hydrophone

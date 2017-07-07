@@ -118,6 +118,9 @@ void ProviderHydrophoneNode::handlePing() {
 void ProviderHydrophoneNode::sendPingDebug(std::shared_ptr<Ping> ping) {
     provider_hydrophone::PingDebugMsg pingMsg;
 
+    pingMsg.header.stamp = ros::Time();
+    pingMsg.header.seq = seqDebug++;
+
     pingMsg.frequency = ping->getFrequency();
     pingMsg.amplitude = ping->getAmplitude();
     pingMsg.noise = ping->getNoise();
@@ -137,6 +140,9 @@ void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
     double a = 0.015;//TODO Const
 
     PingMsg pingMsg;
+
+    pingMsg.header.stamp = ros::Time();
+    pingMsg.header.seq = seq++;
 
     double phaseRef = atan2(ping->getChannelReferenceImage(), ping->getChannelReferenceReal());
     double phase1 = atan2(ping->getChannel1Image(), ping->getChannel1Real());
