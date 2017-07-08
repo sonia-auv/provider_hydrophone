@@ -84,9 +84,14 @@ namespace provider_hydrophone
 
     void HydroUsbDriver::setThreshold(unsigned int threshold) {
 
-        // TODO Check argument validation
+        if (threshold > 9)
+            threshold = 9;
 
-        // TODO If aquisition mode, quit
+        bool isAcquiringData = this->isAcquiringData();
+
+        // If is acquiring data, stop
+        if (isAcquiringData)
+            stopAcquireData();
 
         writeData("4\r");  // TODO Use constant
         usleep(100000); // TODO TEMP Give time to board to execute command
@@ -98,15 +103,22 @@ namespace provider_hydrophone
         std::cout << "Setting threshold data return 2 : " << readData(200) << std::endl;
         //readData(200);
 
-        // TODO If was in aquisition mode, restart
+        // If we were acquiring data before, restart
+        if (isAcquiringData)
+            startAcquireData();
 
     }
 
     void HydroUsbDriver::setGain(unsigned int gain) {
 
-        // TODO Check argument validation
+        if (gain > 7)
+            gain = 8;
 
-        // TODO If aquisition mode, quit
+        bool isAcquiringData = this->isAcquiringData();
+
+        // If is acquiring data, stop
+        if (isAcquiringData)
+            stopAcquireData();
 
         writeData("5\r");  // TODO Use constant
         usleep(100000);// TODO TEMP Give time to board to execute command
@@ -118,7 +130,10 @@ namespace provider_hydrophone
         std::cout << "Setting gain data return 2 : " << readData(200) << std::endl;
         //readData(200);
 
-        // TODO If was in aquisition mode, restart
+        // If we were acquiring data before, restart
+        if (isAcquiringData)
+            startAcquireData();
+
     }
 
     bool HydroUsbDriver::writeData(std::string data) {
