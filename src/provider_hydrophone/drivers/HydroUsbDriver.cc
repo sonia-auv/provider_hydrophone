@@ -13,7 +13,7 @@
 namespace provider_hydrophone
 {
 
-    HydroUsbDriver::HydroUsbDriver(char* deviceTty) {
+    HydroUsbDriver::HydroUsbDriver(const char* deviceTty) {
 
         if (!connect(deviceTty))
             return;
@@ -32,7 +32,7 @@ namespace provider_hydrophone
         return tty != 0 && tty != -1;
     }
 
-    bool HydroUsbDriver::connect(char *deviceTty) {
+    bool HydroUsbDriver::connect(const char *deviceTty) {
 
         if (isConnected())
             closeConnection();

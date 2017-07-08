@@ -15,7 +15,7 @@ namespace provider_hydrophone
 
     public:
 
-        HydroUsbDriver(char* deviceTty);
+        HydroUsbDriver(const char* deviceTty);
         ~HydroUsbDriver();
 
         bool isConnected();
@@ -36,7 +36,7 @@ namespace provider_hydrophone
         int tty = 0;
         bool acquiringData = false;
 
-        bool connect(char* deviceTty);
+        bool connect(const char* deviceTty);
         void configurePortSetting();
 
         bool writeData(std::string data);
