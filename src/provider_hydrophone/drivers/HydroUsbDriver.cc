@@ -20,8 +20,6 @@ namespace provider_hydrophone
 
         configurePortSetting();
 
-        // Be sure
-
     }
 
     HydroUsbDriver::~HydroUsbDriver() {
@@ -234,7 +232,7 @@ namespace provider_hydrophone
 
         std::cout << "Line : " << line << std::endl;
         std::smatch matcher;
-        std::regex expression("(\\d+)kHz\\s*(\\d+)\\s*(\\d+)\\s*([-]?\\d+)\\/\\s*([-]?\\d+)\\s*([-]?\\d+)\\/\\s*([-]?\\d+)\\s*([-]?\\d+)\\/\\s*([-]?\\d+)");
+        std::regex expression(REGEX);
 
         bool searchFound = std::regex_search(line, matcher, expression);
 
@@ -243,20 +241,18 @@ namespace provider_hydrophone
 
             std::shared_ptr<Ping> ping(new Ping());
 
-            // TODO Matcher ID const
+            ping->setFrequency(std::stoi(matcher[REGEX_FREQUENCY_ID]));
+            ping->setAmplitude(std::stoi(matcher[REGEX_AMPLITUDE_ID]));
+            ping->setNoise(std::stoi(matcher[REGEX_NOISE_ID]));
 
-            ping->setFrequency(std::stoi(matcher[1]));
-            ping->setAmplitude(std::stoi(matcher[2]));
-            ping->setNoise(std::stoi(matcher[3]));
+            ping->setChannelReferenceReal(std::stoi(matcher[REGEX_CHANNEL_REFERENCE_REAL_ID]));
+            ping->setChannelReferenceImage(std::stoi(matcher[REGEX_CHANNEL_REFERENCE_IMAGE_ID]));
 
-            ping->setChannelReferenceReal(std::stoi(matcher[4]));
-            ping->setChannelReferenceImage(std::stoi(matcher[5]));
+            ping->setChannel1Real(std::stoi(matcher[REGEX_CHANNEL_1_REAL_ID]));
+            ping->setChannel1Image(std::stoi(matcher[REGEX_CHANNEL_1_IMAGE_ID]));
 
-            ping->setChannel1Real(std::stoi(matcher[6]));
-            ping->setChannel1Image(std::stoi(matcher[7]));
-
-            ping->setChannel2Real(std::stoi(matcher[8]));
-            ping->setChannel2Image(std::stoi(matcher[9]));
+            ping->setChannel2Real(std::stoi(matcher[REGEX_CHANNEL_2_REAL_ID]));
+            ping->setChannel2Image(std::stoi(matcher[REGEX_CHANNEL_2_IMAGE_ID]));
 
             return ping;
 

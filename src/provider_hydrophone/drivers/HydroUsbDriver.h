@@ -60,6 +60,17 @@ namespace provider_hydrophone
 
         const unsigned int WAITING_TIME = 100000;
 
+        const char * REGEX = "(\\d+)kHz\\s*(\\d+)\\s*(\\d+)\\s*([-]?\\d+)\\/\\s*([-]?\\d+)\\s*([-]?\\d+)\\/\\s*([-]?\\d+)\\s*([-]?\\d+)\\/\\s*([-]?\\d+)";
+
+        const unsigned char REGEX_FREQUENCY_ID = 1;
+        const unsigned char REGEX_AMPLITUDE_ID = 2;
+        const unsigned char REGEX_NOISE_ID = 3;
+        const unsigned char REGEX_CHANNEL_REFERENCE_REAL_ID = 4;
+        const unsigned char REGEX_CHANNEL_REFERENCE_IMAGE_ID = 5;
+        const unsigned char REGEX_CHANNEL_1_REAL_ID = 6;
+        const unsigned char REGEX_CHANNEL_1_IMAGE_ID = 7;
+        const unsigned char REGEX_CHANNEL_2_REAL_ID = 8;
+        const unsigned char REGEX_CHANNEL_2_IMAGE_ID = 9;
 
     };
 }
