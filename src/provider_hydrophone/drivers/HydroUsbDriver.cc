@@ -84,8 +84,8 @@ namespace provider_hydrophone
 
     void HydroUsbDriver::setThreshold(unsigned int threshold) {
 
-        if (threshold > 9)
-            threshold = 9;
+        if (threshold > MAX_THRESHOLD_VALUE)
+            threshold = MAX_THRESHOLD_VALUE;
 
         bool isAcquiringData = this->isAcquiringData();
 
@@ -93,13 +93,21 @@ namespace provider_hydrophone
         if (isAcquiringData)
             stopAcquireData();
 
-        writeData("4\r");  // TODO Use constant
-        usleep(100000); // TODO TEMP Give time to board to execute command
+        writeData(SET_THRESHOLD_COMMAND);
+
+        // Give time to board to execute command
+        usleep(WAITING_TIME);
+
         std::cout << "Setting threshold data return 1 : " << readData(200) << std::endl;
         //readData(200);
-        usleep(100000);// TODO TEMP Give time to board to execute command
-        writeData(std::to_string(threshold) + "\r");
-        usleep(100000);// TODO TEMP Give time to board to execute command
+
+        // Give time to board to execute command
+        usleep(WAITING_TIME);
+        writeData(std::to_string(threshold) + ENTER_COMMAND_CHAR);
+
+        // Give time to board to execute command
+        usleep(WAITING_TIME);
+
         std::cout << "Setting threshold data return 2 : " << readData(200) << std::endl;
         //readData(200);
 
@@ -111,8 +119,8 @@ namespace provider_hydrophone
 
     void HydroUsbDriver::setGain(unsigned int gain) {
 
-        if (gain > 7)
-            gain = 8;
+        if (gain > MAX_GAIN_VALUE)
+            gain = MAX_GAIN_VALUE;
 
         bool isAcquiringData = this->isAcquiringData();
 
@@ -120,13 +128,21 @@ namespace provider_hydrophone
         if (isAcquiringData)
             stopAcquireData();
 
-        writeData("5\r");  // TODO Use constant
-        usleep(100000);// TODO TEMP Give time to board to execute command
+        writeData(SET_GAIN_COMMAND);
+
+        // Give time to board to execute command
+        usleep(WAITING_TIME);
+
         std::cout << "Setting gain data return 1 : " << readData(200) << std::endl;
         //readData(200);
-        usleep(100000);// TODO TEMP Give time to board to execute command
-        writeData(std::to_string(gain) + "\r");
-        usleep(100000);// TODO TEMP Give time to board to execute command
+
+        // Give time to board to execute command
+        usleep(WAITING_TIME);
+        writeData(std::to_string(gain) + ENTER_COMMAND_CHAR);
+
+        // Give time to board to execute command
+        usleep(WAITING_TIME);
+
         std::cout << "Setting gain data return 2 : " << readData(200) << std::endl;
         //readData(200);
 
@@ -172,9 +188,10 @@ namespace provider_hydrophone
         if (isAcquiringData())
             return;
 
-        writeData("3\r");// TODO Const
+        writeData(SET_NORMAL_MODE_COMMAND);
 
-        usleep(100000);// TODO TEMP Give time to board to execute command
+        // Give time to board to execute command
+        usleep(WAITING_TIME);
 
         std::cout << "Start acquire data return : " << readData(200) << std::endl;
 
@@ -187,7 +204,7 @@ namespace provider_hydrophone
         if (!isAcquiringData())
             return;
 
-        writeData("q");// TODO Const
+        writeData(EXIT_COMMAND);
 
         acquiringData = false;
     }
@@ -225,6 +242,8 @@ namespace provider_hydrophone
         {
 
             std::shared_ptr<Ping> ping(new Ping());
+
+            // TODO Matcher ID const
 
             ping->setFrequency(std::stoi(matcher[1]));
             ping->setAmplitude(std::stoi(matcher[2]));

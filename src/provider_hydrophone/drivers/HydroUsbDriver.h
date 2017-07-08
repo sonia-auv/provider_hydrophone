@@ -46,11 +46,19 @@ namespace provider_hydrophone
         //--------------------------------------------------------
         //-------------------------CONST--------------------------
         //--------------------------------------------------------
-        const unsigned int MIN_THRESHOLD_VALUE = 0;
-        const unsigned int MAX_THRESHOLD_VALUE = 3;
-
-        const unsigned int MIN_GAIN_VALUE = 0;
+        const unsigned int MAX_THRESHOLD_VALUE = 9;
         const unsigned int MAX_GAIN_VALUE = 7;
+
+
+        const std::string ENTER_COMMAND_CHAR = "\r";
+
+        const std::string SET_NORMAL_MODE_COMMAND = "3" + ENTER_COMMAND_CHAR;
+        const std::string SET_THRESHOLD_COMMAND = "4" + ENTER_COMMAND_CHAR;
+        const std::string SET_GAIN_COMMAND = "5" + ENTER_COMMAND_CHAR;
+
+        const std::string EXIT_COMMAND = "q";
+
+        const unsigned int WAITING_TIME = 100000;
 
 
     };
