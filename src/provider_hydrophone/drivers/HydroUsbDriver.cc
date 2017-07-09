@@ -241,7 +241,7 @@ namespace provider_hydrophone
 
             std::shared_ptr<Ping> ping(new Ping());
 
-            ping->setFrequency(std::stoi(matcher[REGEX_FREQUENCY_ID]));
+            ping->setFrequency(std::stoi(matcher[REGEX_FREQUENCY_ID]) - 2); // Offset
             ping->setAmplitude(std::stoi(matcher[REGEX_AMPLITUDE_ID]));
             ping->setNoise(std::stoi(matcher[REGEX_NOISE_ID]));
 

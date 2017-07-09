@@ -24,7 +24,6 @@
  */
 
 #include <fcntl.h>
-#include <termios.h>
 #include "provider_hydrophone/provider_hydrophone_node.h"
 
 namespace provider_hydrophone {
@@ -100,17 +99,16 @@ void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::Hyd
 void ProviderHydrophoneNode::handlePing() {
 
     auto ping = driver.getPing();
-    if (ping != nullptr)
+
+    while (ping != nullptr)
     {
 
         sendPingDebug(ping);
 
         sendPing(ping);
 
-    }
-    else
-    {
-        //std::cout << "!!!!!!!!!!!!We do not have a ping :( ! !!!!!!!!!!!" << std::endl;
+        ping = driver.getPing();
+
     }
 
 }
@@ -166,6 +164,8 @@ void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
     pingMsg.frequency = ping->getFrequency();
     pingMsg.heading = heading;
     pingMsg.elevation = elevation;
+    pingMsg.amplitude = ping->getAmplitude();
+    pingMsg.noise = ping->getNoise();
 
     pingPub.publish(pingMsg);
 }
