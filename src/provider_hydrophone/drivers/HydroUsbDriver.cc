@@ -96,8 +96,7 @@ namespace provider_hydrophone
         // Give time to board to execute command
         usleep(WAITING_TIME);
 
-        std::cout << "Setting threshold data return 1 : " << readData(200) << std::endl;
-        //readData(200);
+        readData(200);
 
         // Give time to board to execute command
         usleep(WAITING_TIME);
@@ -106,8 +105,7 @@ namespace provider_hydrophone
         // Give time to board to execute command
         usleep(WAITING_TIME);
 
-        std::cout << "Setting threshold data return 2 : " << readData(200) << std::endl;
-        //readData(200);
+        readData(200);
 
         // If we were acquiring data before, restart
         if (isAcquiringData)
@@ -131,8 +129,7 @@ namespace provider_hydrophone
         // Give time to board to execute command
         usleep(WAITING_TIME);
 
-        std::cout << "Setting gain data return 1 : " << readData(200) << std::endl;
-        //readData(200);
+        readData(200);
 
         // Give time to board to execute command
         usleep(WAITING_TIME);
@@ -141,8 +138,7 @@ namespace provider_hydrophone
         // Give time to board to execute command
         usleep(WAITING_TIME);
 
-        std::cout << "Setting gain data return 2 : " << readData(200) << std::endl;
-        //readData(200);
+        readData(200);
 
         // If we were acquiring data before, restart
         if (isAcquiringData)
@@ -154,11 +150,7 @@ namespace provider_hydrophone
 
         int  bytes_written  =  0 ;
 
-        std::cout << "Size : " << data.length() << std::endl;
-
         bytes_written = write(tty, data.c_str(), data.length());
-
-        std::cout << bytes_written << " bytes wrote" << std::endl;
 
         return bytes_written != -1;
     }
@@ -191,7 +183,8 @@ namespace provider_hydrophone
         // Give time to board to execute command
         usleep(WAITING_TIME);
 
-        std::cout << "Start acquire data return : " << readData(200) << std::endl;
+        readData(200);
+        readData(200);
 
         acquiringData = true;
 
@@ -230,7 +223,6 @@ namespace provider_hydrophone
 
         auto line = readLine();
 
-        std::cout << "Line : " << line << std::endl;
         std::smatch matcher;
         std::regex expression(REGEX);
 
