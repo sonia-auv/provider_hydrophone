@@ -13,11 +13,9 @@
 namespace provider_hydrophone
 {
 
-    HydroUsbDriver::HydroUsbDriver(Configuration &configuration)
-        : configuration(configuration)
-    {
+    HydroUsbDriver::HydroUsbDriver(const char* deviceTty) {
 
-        if (!connect(configuration.getTtyPort().c_str()))
+        if (!connect(deviceTty))
             return;
 
         configurePortSetting();

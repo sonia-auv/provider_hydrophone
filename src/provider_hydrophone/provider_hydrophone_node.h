@@ -80,6 +80,9 @@ namespace provider_hydrophone {
         unsigned int seq = 0;
         unsigned int seqDebug = 0;
 
+        uint16_t soundSpeed;
+        double_t distanceBetweenHydrophone;
+
     };
 
 }  // namespace provider_hydrophone

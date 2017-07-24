@@ -7,7 +7,6 @@
 
 #include <ros/ros.h>
 #include <regex>
-#include <provider_hydrophone/Configuration.h>
 #include "Ping.h"
 
 namespace provider_hydrophone
@@ -16,7 +15,7 @@ namespace provider_hydrophone
 
     public:
 
-        HydroUsbDriver(Configuration &configuration);
+        HydroUsbDriver(const char* deviceTty);
         ~HydroUsbDriver();
 
         bool isConnected();
@@ -33,8 +32,6 @@ namespace provider_hydrophone
         std::shared_ptr<Ping> getPing();
 
     private:
-
-        Configuration configuration;
 
         int tty = 0;
         bool acquiringData = false;
