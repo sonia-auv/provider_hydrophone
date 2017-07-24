@@ -7,27 +7,38 @@
 namespace provider_hydrophone
 {
 
-    Configuration::Configuration() {
+    Configuration::Configuration(const ros::NodeHandlePtr &nh)
+        : nh(nh),
+          distanceBetweenHydrophone(0.015),
+          soundSpeed(1484),
+          threshold(4),
+          gain(2),
+          ttyPort("/dev/ttyUSB0")
+    {
+        Deserialize();
+    }
+
+    Configuration::~Configuration() {}
+
+    void Configuration::Deserialize() {
+
+        FindParameter("/hydrophone/distance_between_hydrophone", distanceBetweenHydrophone);
+        FindParameter("/hydrophone/sound_speed", soundSpeed);
+        FindParameter("/hydrophone/threshold", threshold);
+        FindParameter("/hydrophone/gain", gain);
+
+        FindParameter("/connection/tty_port", ttyPort);
 
     }
 
-    Configuration::~Configuration() {
-
+    template <typename TType>
+    void Configuration::FindParameter(const std::string &paramName, TType &attribute) {
+        if (nh->hasParam("/provider_hydrophone" + paramName)) {
+            nh->getParam("/provider_hydrophone" + paramName, attribute);
+        } else {
+            ROS_WARN_STREAM("Did not find /provider_hydrophone" + paramName
+                                    << ". Using default.");
+        }
     }
 
-    double_t Configuration::getDistanceBetweenHydrophone() const {
-        return distanceBetweenHydrophone;
-    }
-
-    uint16_t Configuration::getSoundSpeed() const {
-        return soundSpeed;
-    }
-
-    uint8_t Configuration::getThreshold() const {
-        return threshold;
-    }
-
-    uint8_t Configuration::getGain() const {
-        return gain;
-    }
 }

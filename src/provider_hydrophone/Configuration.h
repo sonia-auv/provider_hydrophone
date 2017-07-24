@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <cmath>
+#include <ros/ros.h>
 
 namespace provider_hydrophone
 {
@@ -14,24 +15,38 @@ namespace provider_hydrophone
 
     public:
 
-        Configuration();
+        Configuration(const ros::NodeHandlePtr &nh);
         ~Configuration();
 
-        double_t getDistanceBetweenHydrophone() const;
+        double_t getDistanceBetweenHydrophone() const {return distanceBetweenHydrophone;};
 
-        uint16_t getSoundSpeed() const;
+        uint16_t getSoundSpeed() const {return soundSpeed;};
 
-        uint8_t getThreshold() const;
+        uint8_t getThreshold() const {return threshold;};
 
-        uint8_t getGain() const;
+        uint8_t getGain() const {return gain;};
+
+        std::string getTtyPort() const {return ttyPort;}
 
     private:
 
+        ros::NodeHandlePtr nh;
+
         double_t distanceBetweenHydrophone;
-        uint16_t soundSpeed;
-        uint8_t threshold;
-        uint8_t gain;
-    };
+        int32_t soundSpeed;
+        int32_t threshold;
+        int32_t gain;
+
+        std::string ttyPort;
+
+        void Deserialize();
+        void SetParameter();
+
+        template <typename TType>
+        void FindParameter(const std::string &paramName, TType &attribute);
+
+
+        };
 }
 
 
