@@ -1,5 +1,5 @@
 #Constants informations
 /provider_hydrophone/const/distance_between_hydrophone: 0.015 #meters
 /provider_hydrophone/const/sound_speed: 1484 #meters/second
-
-
+/provider_hydrophone/const/threshold: 4 # threshold
+/provider_hydrophone/const/gain: 2 # gain
