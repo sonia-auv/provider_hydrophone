@@ -36,7 +36,7 @@ namespace provider_hydrophone {
 ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
     : nh_(nh),
       configuration(nh),
-      driver("/dev/ttyUSB0"),
+      driver(configuration),
       threshold_(4),
       current_threshold_(4),
       gain_(2),
