@@ -111,6 +111,8 @@ namespace provider_hydrophone
         if (isAcquiringData)
             startAcquireData();
 
+        ROS_INFO_STREAM("Threshold has been setted : " << threshold);
+
     }
 
     void HydroUsbDriver::setGain(unsigned int gain) {
@@ -143,6 +145,8 @@ namespace provider_hydrophone
         // If we were acquiring data before, restart
         if (isAcquiringData)
             startAcquireData();
+
+        ROS_INFO_STREAM("Gain has been setted : " << gain);
 
     }
 
