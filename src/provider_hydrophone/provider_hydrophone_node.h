@@ -34,51 +34,56 @@
 #include "provider_hydrophone/PingDebugMsg.h"
 #include "provider_hydrophone/PingMsg.h"
 #include "math.h"
+#include "Configuration.h"
 
 namespace provider_hydrophone {
 
-class ProviderHydrophoneNode {
- public:
-  //==========================================================================
-  // T Y P E D E F   A N D   E N U M
+    class ProviderHydrophoneNode {
+    public:
+        //==========================================================================
+        // T Y P E D E F   A N D   E N U M
 
-  //==========================================================================
-  // P U B L I C   C / D T O R S
+        //==========================================================================
+        // P U B L I C   C / D T O R S
 
-  explicit ProviderHydrophoneNode(const ros::NodeHandlePtr &nh);
+        explicit ProviderHydrophoneNode(const ros::NodeHandlePtr &nh);
 
-  ~ProviderHydrophoneNode();
+        ~ProviderHydrophoneNode();
 
-  /// Taking care of the spinning of the ROS thread.
-  /// Each iteration of the loop, this will take the objects in the object
-  /// registery, empty it and publish the objects.
-  void Spin();
-  void CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level);
+        /// Taking care of the spinning of the ROS thread.
+        /// Each iteration of the loop, this will take the objects in the object
+        /// registery, empty it and publish the objects.
+        void Spin();
+        void CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level);
 
-private:
-  ros::NodeHandlePtr nh_;
+    private:
+        ros::NodeHandlePtr nh_;
+        Configuration configuration;
 
-  dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
+        dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
 
-  void handlePing();
+        void handlePing();
 
-  void sendPingDebug(std::shared_ptr<Ping> ping);
-  void sendPing(std::shared_ptr<Ping> ping);
+        void sendPingDebug(std::shared_ptr<Ping> ping);
+        void sendPing(std::shared_ptr<Ping> ping);
 
-  HydroUsbDriver driver;
+        HydroUsbDriver driver;
 
-  ros::Publisher pingDebugPub;
-  ros::Publisher pingPub;
+        ros::Publisher pingDebugPub;
+        ros::Publisher pingPub;
 
-  unsigned int threshold_ = 0;
-  unsigned int current_threshold_ = 0;
-  unsigned int gain_ = 0;
-  unsigned int current_gain_ = 0;
+        unsigned int threshold_ = 0;
+        unsigned int current_threshold_ = 0;
+        unsigned int gain_ = 0;
+        unsigned int current_gain_ = 0;
 
-    unsigned int seq = 0;
-    unsigned int seqDebug = 0;
+        unsigned int seq = 0;
+        unsigned int seqDebug = 0;
 
-};
+        uint16_t soundSpeed;
+        double_t distanceBetweenHydrophone;
+
+    };
 
 }  // namespace provider_hydrophone
 

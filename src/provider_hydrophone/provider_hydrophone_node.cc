@@ -35,11 +35,15 @@ namespace provider_hydrophone {
 //
 ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
     : nh_(nh),
-      driver("/dev/ttyUSB0"),
-      threshold_(4),
-      current_threshold_(4),
-      gain_(2),
-      current_gain_(2) {
+      configuration(nh),
+      driver(configuration.getTtyPort().c_str()),
+      threshold_(configuration.getThreshold()),
+      current_threshold_(configuration.getThreshold()),
+      gain_(configuration.getGain()),
+      current_gain_(configuration.getGain()),
+      soundSpeed(configuration.getSoundSpeed()),
+      distanceBetweenHydrophone(configuration.getDistanceBetweenHydrophone())
+    {
 
   server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
 
@@ -134,9 +138,6 @@ void ProviderHydrophoneNode::sendPingDebug(std::shared_ptr<Ping> ping) {
 
 void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
 
-    unsigned int soundSpeed = 1484; //TODO Const
-    double a = 0.015;//TODO Const
-
     PingMsg pingMsg;
 
     pingMsg.header.stamp = ros::Time::now();
@@ -158,7 +159,7 @@ void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
 
     double t2 = (dephase2 / (2 * M_PI)) * lambda;
 
-    double elevation = acos(t2/(cos(heading) * a));
+    double elevation = acos(t2/(cos(heading) * distanceBetweenHydrophone));
 
 
     pingMsg.frequency = ping->getFrequency();
