@@ -96,6 +96,8 @@ void ProviderHydrophoneNode::Spin() {
 
 void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
 {
+    ROS_INFO_STREAM("DynamicReconfigure callback. Old threshold : " << threshold_ << " new threshold : " << config.Threshold);
+    ROS_INFO_STREAM("DynamicReconfigure callback. Old gain : " << gain_ << " new gain : " << config.Gain);
   threshold_ = config.Threshold;
   gain_ = config.Gain;
 }
@@ -120,6 +122,8 @@ void ProviderHydrophoneNode::handlePing() {
 void ProviderHydrophoneNode::sendPingDebug(std::shared_ptr<Ping> ping) {
     provider_hydrophone::PingDebugMsg pingMsg;
 
+    ROS_DEBUG("Creating PingDebug");
+
     pingMsg.header.stamp = ros::Time::now();
     pingMsg.header.seq = seqDebug++;
 
@@ -133,10 +137,17 @@ void ProviderHydrophoneNode::sendPingDebug(std::shared_ptr<Ping> ping) {
     pingMsg.channel2Real = ping->getChannel2Real();
     pingMsg.channel2Image = ping->getChannel2Image();
 
+    ROS_DEBUG("End creating PingDebug. Publishing it to topics");
+
     pingDebugPub.publish(pingMsg);
+
+    ROS_DEBUG("PingDebug published");
+
 }
 
 void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
+
+    ROS_DEBUG("Creating PingMessage");
 
     PingMsg pingMsg;
 
@@ -168,7 +179,11 @@ void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
     pingMsg.amplitude = ping->getAmplitude();
     pingMsg.noise = ping->getNoise();
 
+    ROS_DEBUG("End creating PingDebug. Publishing it to topics");
+
     pingPub.publish(pingMsg);
+
+    ROS_DEBUG("PingDebug published");
 }
 
 }  // namespace provider_hydrophone

@@ -51,6 +51,9 @@ namespace provider_hydrophone
     }
 
     void HydroUsbDriver::configurePortSetting() {
+
+        ROS_INFO("Configuring serial port settings");
+
         struct termios SerialPortSettings;
 
         tcgetattr(tty, &SerialPortSettings);
@@ -63,6 +66,9 @@ namespace provider_hydrophone
         //SerialPortSettings.c_iflag &= ~ICANON;
         //SerialPortSettings.c_cc[VTIME] = 1
         tcsetattr(tty,TCSANOW,&SerialPortSettings);
+
+        ROS_INFO("End configuring serial port settings");
+
     }
 
     void HydroUsbDriver::closeConnection() {
@@ -82,6 +88,8 @@ namespace provider_hydrophone
 
     void HydroUsbDriver::setThreshold(unsigned int threshold) {
 
+        ROS_INFO("Setting a new threshold on the hydrophone board");
+
         if (threshold > MAX_THRESHOLD_VALUE)
             threshold = MAX_THRESHOLD_VALUE;
 
@@ -89,7 +97,11 @@ namespace provider_hydrophone
 
         // If is acquiring data, stop
         if (isAcquiringData)
+        {
+            ROS_INFO("We were acquiring data. Acquisition will stop for a moment");
             stopAcquireData();
+        }
+
 
         writeData(SET_THRESHOLD_COMMAND);
 
@@ -107,15 +119,23 @@ namespace provider_hydrophone
 
         readData(200);
 
+        ROS_INFO_STREAM("Threshold has been setted : " << threshold);
+
         // If we were acquiring data before, restart
         if (isAcquiringData)
+        {
+            ROS_INFO("Threshold has been setted. Acquisition restart");
             startAcquireData();
+        }
 
-        ROS_INFO_STREAM("Threshold has been setted : " << threshold);
+
+        ROS_INFO("End of setting a threshold on the hydrophone board");
 
     }
 
     void HydroUsbDriver::setGain(unsigned int gain) {
+
+        ROS_INFO("Setting a new gain on the hydrophone board");
 
         if (gain > MAX_GAIN_VALUE)
             gain = MAX_GAIN_VALUE;
@@ -124,7 +144,10 @@ namespace provider_hydrophone
 
         // If is acquiring data, stop
         if (isAcquiringData)
+        {
+            ROS_INFO("We were acquiring data. Acquisition will stop for a moment");
             stopAcquireData();
+        }
 
         writeData(SET_GAIN_COMMAND);
 
@@ -142,30 +165,43 @@ namespace provider_hydrophone
 
         readData(200);
 
+        ROS_INFO_STREAM("Gain has been setted : " << gain);
+
         // If we were acquiring data before, restart
         if (isAcquiringData)
+        {
+            ROS_INFO("Gain has been setted. Acquisition restart");
             startAcquireData();
+        }
 
-        ROS_INFO_STREAM("Gain has been setted : " << gain);
+        ROS_INFO("End of setting a gain on the hydrophone board");
+
 
     }
 
     bool HydroUsbDriver::writeData(std::string data) {
 
+        ROS_DEBUG("Sending data to board");
+
         int  bytes_written  =  0 ;
 
         bytes_written = write(tty, data.c_str(), data.length());
+
+        ROS_DEBUG("End sending data to board");
 
         return bytes_written != -1;
     }
 
     std::string HydroUsbDriver::readData(unsigned int length) {
 
+        ROS_DEBUG("Reading data to board");
 
         char read_buffer[length];
         int  bytes_read = 0;
 
         bytes_read = read(tty,&read_buffer,sizeof(read_buffer));
+
+        ROS_DEBUG("End reading data to board");
 
         if (bytes_read != -1)
             return std::string(read_buffer);
@@ -178,6 +214,8 @@ namespace provider_hydrophone
     }
 
     void HydroUsbDriver::startAcquireData() {
+
+        ROS_DEBUG("Start acquiring data");
 
         if (isAcquiringData())
             return;
@@ -196,6 +234,8 @@ namespace provider_hydrophone
 
     void HydroUsbDriver::stopAcquireData() {
 
+        ROS_DEBUG("Stop acquiring data");
+
         if (!isAcquiringData())
             return;
 
@@ -205,6 +245,8 @@ namespace provider_hydrophone
     }
 
     std::string HydroUsbDriver::readLine() {
+
+        ROS_DEBUG("Reading a line on hydrophone board");
 
         std::string string;
         std::string lastChar;
@@ -220,10 +262,14 @@ namespace provider_hydrophone
         if (string.length() > 0)
             string.resize(string.length() - 1);
 
+        ROS_DEBUG("End reading a line on hydrophone board");
+
         return string;
     }
 
     std::shared_ptr<Ping> HydroUsbDriver::getPing() {
+
+        ROS_DEBUG("Try to get a ping");
 
         auto line = readLine();
 
@@ -234,6 +280,7 @@ namespace provider_hydrophone
 
         if (searchFound)
         {
+            ROS_DEBUG("Ping found with the REGEX");
 
             std::shared_ptr<Ping> ping(new Ping());
 
@@ -252,6 +299,8 @@ namespace provider_hydrophone
 
             return ping;
 
+        } else {
+            ROS_DEBUG("No ping found with the REGEX");
         }
 
         return std::shared_ptr<Ping>(nullptr);
