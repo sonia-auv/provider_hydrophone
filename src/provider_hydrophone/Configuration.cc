@@ -22,6 +22,8 @@ namespace provider_hydrophone
 
     void Configuration::Deserialize() {
 
+        ROS_INFO("Deserialize params");
+
         FindParameter("/hydrophone/distance_between_hydrophone", distanceBetweenHydrophone);
         FindParameter("/hydrophone/sound_speed", soundSpeed);
         FindParameter("/hydrophone/threshold", threshold);
@@ -29,6 +31,7 @@ namespace provider_hydrophone
 
         FindParameter("/connection/tty_port", ttyPort);
 
+        ROS_INFO("End deserialize params");
     }
 
     template <typename TType>
