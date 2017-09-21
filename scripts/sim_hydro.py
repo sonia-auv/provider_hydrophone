@@ -7,7 +7,7 @@ from provider_hydrophone.msg import PingMsg
 
 def sim_power():
     rospy.init_node('sim_hydro', anonymous=True)
-    pub = rospy.Publisher('/provider_hydrophone/provider_hydrophone', PingMsg, queue_size=10)
+    pub = rospy.Publisher('/provider_hydrophone/ping', PingMsg, queue_size=10)
     rate = rospy.Rate(1)  # 10hz
     msg = PingMsg()
     while not rospy.is_shutdown():
