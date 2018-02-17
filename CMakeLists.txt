@@ -46,6 +46,7 @@ generate_dynamic_reconfigure_options(
 
 add_message_files(DIRECTORY msg
         FILES
+        HydroDebug.msg
         PingDebugMsg.msg
         PingMsg.msg
         )

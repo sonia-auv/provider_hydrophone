@@ -154,9 +154,16 @@ void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
     pingMsg.header.stamp = ros::Time::now();
     pingMsg.header.seq = seq++;
 
-    double phaseRef = atan2(ping->getChannelReferenceImage(), ping->getChannelReferenceReal());
-    double phase1 = atan2(ping->getChannel1Image(), ping->getChannel1Real());
-    double phase2 = atan2(ping->getChannel2Image(), ping->getChannel2Real());
+    int chanRefReal = ping->getChannelReferenceReal();
+    int chanRefImage = ping->getChannelReferenceImage();
+    int chan1Real = ping->getChannel1Real();
+    int chan1Image = ping->getChannel1Image();
+    int chan2Real = ping->getChannel2Real();
+    int chan2Image = ping->getChannel2Image();
+
+    double phaseRef = atan2(chanRefImage, chanRefReal);
+    double phase1 = atan2(chan1Image, chan1Real);
+    double phase2 = atan2(chan2Image, chan2Real);
 
     double dephase1 = phase1 - phaseRef;
     double dephase2 = phase2 - phaseRef;
@@ -172,18 +179,23 @@ void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
 
     double elevation = acos(t2/(cos(heading) * distanceBetweenHydrophone));
 
-
+    pingMsg.debug.channelReferenceReal = chanRefReal;
+    pingMsg.debug.channelReferenceImage = chanRefImage;
+    pingMsg.debug.channel1Real = chan1Real;
+    pingMsg.debug.channel1Image = chan1Image;
+    pingMsg.debug.channel2Real = chan2Real;
+    pingMsg.debug.channel2Image = chan2Image;
     pingMsg.frequency = ping->getFrequency();
     pingMsg.heading = heading;
     pingMsg.elevation = elevation;
     pingMsg.amplitude = ping->getAmplitude();
     pingMsg.noise = ping->getNoise();
 
-    ROS_DEBUG("End creating PingDebug. Publishing it to topics");
+    ROS_DEBUG("End creating PingMessage. Publishing it to topics");
 
     pingPub.publish(pingMsg);
 
-    ROS_DEBUG("PingDebug published");
+    ROS_DEBUG("PingMessage published");
 }
 
 }  // namespace provider_hydrophone
