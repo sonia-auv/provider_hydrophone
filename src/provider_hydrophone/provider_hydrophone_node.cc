@@ -179,12 +179,12 @@ void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
 
     double elevation = acos(t2/(cos(heading) * distanceBetweenHydrophone));
 
-    pingMsg.debug.channelReferenceReal = chanRefReal;
-    pingMsg.debug.channelReferenceImage = chanRefImage;
-    pingMsg.debug.channel1Real = chan1Real;
-    pingMsg.debug.channel1Image = chan1Image;
-    pingMsg.debug.channel2Real = chan2Real;
-    pingMsg.debug.channel2Image = chan2Image;
+    pingMsg.raw_data.channelReferenceReal = chanRefReal;
+    pingMsg.raw_data.channelReferenceImage = chanRefImage;
+    pingMsg.raw_data.channel1Real = chan1Real;
+    pingMsg.raw_data.channel1Image = chan1Image;
+    pingMsg.raw_data.channel2Real = chan2Real;
+    pingMsg.raw_data.channel2Image = chan2Image;
     pingMsg.frequency = ping->getFrequency();
     pingMsg.heading = heading;
     pingMsg.elevation = elevation;

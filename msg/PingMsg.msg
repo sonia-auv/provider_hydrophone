@@ -4,4 +4,4 @@ uint32 amplitude
 uint32 noise
 float64 heading
 float64 elevation
-provider_hydrophone/HydroDebug debug
+provider_hydrophone/HydroDebug raw_data
