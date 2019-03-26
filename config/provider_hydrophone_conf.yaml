@@ -4,4 +4,4 @@
 /provider_hydrophone/hydrophone/threshold: 4 # threshold
 /provider_hydrophone/hydrophone/gain: 3 # gain
 
-/provider_hydrophone/connection/tty_port: "/dev/ttyUSB0"
+/provider_hydrophone/connection/tty_port: "/dev/HYDRO"
