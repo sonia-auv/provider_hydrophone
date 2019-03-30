@@ -199,7 +199,7 @@ namespace provider_hydrophone
         char read_buffer[length];
         int  bytes_read = 0;
 
-        bytes_read = read(tty,&read_buffer,sizeof(read_buffer));
+        bytes_read = read(tty,&read_buffer, sizeof(read_buffer));
 
         ROS_DEBUG("End reading data to board");
 
@@ -254,9 +254,9 @@ namespace provider_hydrophone
         do{
 
             lastChar = readData(1);
-
-            string += lastChar;
-
+	    if (!lastChar.empty()){
+            	string += lastChar.at(0);
+	    }
         } while (lastChar.length() != 0 && lastChar.at(0) != '\n');
 
         if (string.length() > 0)
@@ -275,6 +275,9 @@ namespace provider_hydrophone
 
         std::smatch matcher;
         std::regex expression(REGEX);
+	
+	//if (!line.empty())
+	//	std::cout << line << std::endl;
 
         bool searchFound = std::regex_search(line, matcher, expression);
 
