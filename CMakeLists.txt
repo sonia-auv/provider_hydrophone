@@ -38,7 +38,7 @@ find_package(
 )
 
 generate_dynamic_reconfigure_options(
-        cfg/HydroReconfig.cfg
+        cfg/Hydro.cfg
 )
 
 #===============================================================================
