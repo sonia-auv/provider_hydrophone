@@ -31,8 +31,8 @@
 #include <provider_hydrophone/HydroConfig.h>
 
 #include "drivers/HydroUsbDriver.h"
-#include <sonia_msgs/PingDebugMsg.h>
-#include <sonia_msgs/PingMsg.h>
+#include <sonia_common/PingDebugMsg.h>
+#include <sonia_common/PingMsg.h>
 #include "math.h"
 #include "Configuration.h"
 
