@@ -52,8 +52,8 @@ ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
   config.Gain = current_gain_;
   CallBackDynamicReconfigure(config, 0);
 
-  pingDebugPub = nh_->advertise<sonia_msgs::PingDebugMsg>("/provider_hydrophone/debug/ping", 100);
-  pingPub = nh_->advertise<sonia_msgs::PingMsg>("/provider_hydrophone/ping", 100);
+  pingDebugPub = nh_->advertise<sonia_common::PingDebugMsg>("/provider_hydrophone/debug/ping", 100);
+  pingPub = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
 
   driver.setThreshold(current_threshold_);
   driver.setGain(current_gain_);
@@ -120,7 +120,7 @@ void ProviderHydrophoneNode::handlePing() {
 }
 
 void ProviderHydrophoneNode::sendPingDebug(std::shared_ptr<Ping> ping) {
-    sonia_msgs::PingDebugMsg pingMsg;
+    sonia_common::PingDebugMsg pingMsg;
 
     ROS_DEBUG("Creating PingDebug");
 
@@ -149,7 +149,7 @@ void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping) {
 
     ROS_DEBUG("Creating PingMessage");
 
-    sonia_msgs::PingMsg pingMsg;
+    sonia_common::PingMsg pingMsg;
 
     pingMsg.header.stamp = ros::Time::now();
     pingMsg.header.seq = seq++;

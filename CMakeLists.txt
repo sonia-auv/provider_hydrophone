@@ -33,7 +33,7 @@ find_package(
         cmake_modules
         std_msgs
         dynamic_reconfigure
-        sonia_msgs
+        sonia_common
 )
 
 generate_dynamic_reconfigure_options(
@@ -44,7 +44,7 @@ catkin_package(
         CATKIN_DEPENDS
         roscpp
         std_msgs
-        sonia_msgs
+        sonia_common
 )
 
 
