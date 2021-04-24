@@ -44,8 +44,6 @@ namespace provider_hydrophone
 
         template <typename TType>
         void FindParameter(const std::string &paramName, TType &attribute);
-
-
         };
 }
 

@@ -52,7 +52,7 @@ namespace provider_hydrophone
 
     void HydroUsbDriver::configurePortSetting() {
 
-        ROS_INFO("Configuring serial port settings");
+        ROS_DEBUG("Configuring serial port settings");
 
         struct termios SerialPortSettings;
 
@@ -62,12 +62,10 @@ namespace provider_hydrophone
         cfsetospeed(&SerialPortSettings,B460800);
 
         cfmakeraw(&SerialPortSettings);
-         SerialPortSettings.c_iflag |= IGNCR;//ICRNL;
-        //SerialPortSettings.c_iflag &= ~ICANON;
-        //SerialPortSettings.c_cc[VTIME] = 1
+        SerialPortSettings.c_iflag |= IGNCR;
         tcsetattr(tty,TCSANOW,&SerialPortSettings);
 
-        ROS_INFO("End configuring serial port settings");
+        ROS_DEBUG("End configuring serial port settings");
 
     }
 
