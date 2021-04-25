@@ -27,6 +27,7 @@
 #define PROVIDER_HYDROPHONE_PROVIDER_HYDROPHONE_NODE_H_
 
 #include <ros/node_handle.h>
+#include <regex>
 #include <dynamic_reconfigure/server.h>
 #include <provider_hydrophone/HydroConfig.h>
 
