@@ -229,7 +229,7 @@ namespace provider_hydrophone {
   {
     ROS_DEBUG("Try to get a ping");
 
-    auto line = readLine();
+    auto line = driver.readLine();
 
     std::smatch matcher;
     std::regex expression(REGEX);
@@ -242,18 +242,12 @@ namespace provider_hydrophone {
 
       std::shared_ptr<Ping> ping(new Ping());
 
-      ping->setFrequency(std::stoi(matcher[REGEX_FREQUENCY_ID]));
-      ping->setAmplitude(std::stoi(matcher[REGEX_AMPLITUDE_ID]));
-      ping->setNoise(std::stoi(matcher[REGEX_NOISE_ID]));
+      ping->setFrequency(std::stoi(matcher[REGEX_PHASEREF_ID]));
+      ping->setAmplitude(std::stoi(matcher[REGEX_PHASE1_ID]));
+      ping->setNoise(std::stoi(matcher[REGEX_PHASE2_ID]));
 
-      ping->setChannelReferenceReal(std::stoi(matcher[REGEX_CHANNEL_REFERENCE_REAL_ID]));
-      ping->setChannelReferenceImage(std::stoi(matcher[REGEX_CHANNEL_REFERENCE_IMAGE_ID]));
-
-      ping->setChannel1Real(std::stoi(matcher[REGEX_CHANNEL_1_REAL_ID]));
-      ping->setChannel1Image(std::stoi(matcher[REGEX_CHANNEL_1_IMAGE_ID]));
-
-      ping->setChannel2Real(std::stoi(matcher[REGEX_CHANNEL_2_REAL_ID]));
-      ping->setChannel2Image(std::stoi(matcher[REGEX_CHANNEL_2_IMAGE_ID]));
+      ping->setChannelReferenceReal(std::stoi(matcher[REGEX_PHASE3_ID]));
+      ping->setChannelReferenceImage(std::stoi(matcher[REGEX_FREQUENCY_ID]));
 
       return ping;
     } 

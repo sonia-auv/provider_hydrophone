@@ -94,7 +94,7 @@ namespace provider_hydrophone {
 
         const uint16_t WAITING_TIME = 100000;
 
-        const int8_t * REGEX = "^[0-9]*\\.[0-9]+_[0-9]*\\.[0-9]+_[0-9]*\\.[0-9]+_[0-9]*\\.[0-9]+_[0-9]+_$";
+        const char * REGEX = "^[0-9]*\\.[0-9]+_[0-9]*\\.[0-9]+_[0-9]*\\.[0-9]+_[0-9]*\\.[0-9]+_[0-9]+_$";
 
         const uint8_t REGEX_PHASEREF_ID = 1;
         const uint8_t REGEX_PHASE1_ID = 2;
