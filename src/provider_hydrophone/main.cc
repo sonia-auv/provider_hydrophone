@@ -28,10 +28,8 @@
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "provider_hydrophone");
-
   ros::NodeHandlePtr nh(new ros::NodeHandle("~"));
-    provider_hydrophone::ProviderHydrophoneNode provider_hydrophone_node{nh};
-    provider_hydrophone_node.Spin();
-
+  provider_hydrophone::ProviderHydrophoneNode provider_hydrophone_node{nh};
+  provider_hydrophone_node.Spin();
   return 0;
 }

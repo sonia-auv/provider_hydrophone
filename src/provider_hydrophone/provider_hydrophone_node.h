@@ -30,11 +30,11 @@
 #include <dynamic_reconfigure/server.h>
 #include <provider_hydrophone/HydroConfig.h>
 
-#include "drivers/HydroUsbDriver.h"
-#include <sonia_common/PingDebugMsg.h>
+#include "drivers/UsbDriver.h"
 #include <sonia_common/PingMsg.h>
 #include "math.h"
 #include "Configuration.h"
+#include "Ping.h"
 
 namespace provider_hydrophone {
 
@@ -59,30 +59,47 @@ namespace provider_hydrophone {
     private:
         ros::NodeHandlePtr nh_;
         Configuration configuration;
-
+        UsbDriver driver;
+        ros::Publisher pingPub;
         dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
 
         void handlePing();
-
-        void sendPingDebug(std::shared_ptr<Ping> ping);
         void sendPing(std::shared_ptr<Ping> ping);
 
-        HydroUsbDriver driver;
+        bool isAcquiringData();
+        void startAcquireData();
+        void stopAcquireData();
+        void setGain(uint32_t gain);
 
-        ros::Publisher pingDebugPub;
-        ros::Publisher pingPub;
+        uint16_t gain_ = 0;
+        uint16_t current_gain_ = 0;
+        uint16_t soundSpeed = 0;
+        double_t distanceBetweenHydrophone = 0.0;
+        bool isAcquiring = false;
 
-        unsigned int threshold_ = 0;
-        unsigned int current_threshold_ = 0;
-        unsigned int gain_ = 0;
-        unsigned int current_gain_ = 0;
+        //--------------------------------------------------------
+        //-------------------------CONST--------------------------
+        //--------------------------------------------------------
 
-        unsigned int seq = 0;
-        unsigned int seqDebug = 0;
+        const uint16_t MAX_GAIN_VALUE = 7;
 
-        uint16_t soundSpeed;
-        double_t distanceBetweenHydrophone;
+        const std::string ENTER_COMMAND_CHAR = "\r";
+        const std::string SET_NORMAL_MODE_COMMAND = "1" + ENTER_COMMAND_CHAR;
+        const std::string SET_TEST_PING_MODE_COMMAND = "2" + ENTER_COMMAND_CHAR;
+        const std::string SET_GAIN_COMMAND = "3" + ENTER_COMMAND_CHAR;
+        const std::string SET_RAW_DATA_MODE_COMMAND = "4" + ENTER_COMMAND_CHAR;
 
+        const std::string EXIT_COMMAND = "q";
+
+        const uint16_t WAITING_TIME = 100000;
+
+        const int8_t * REGEX = "";
+
+        const uint8_t REGEX_PHASEREF_ID = 1;
+        const uint8_t REGEX_PHASE1_ID = 2;
+        const uint8_t REGEX_PHASE2_ID = 3;
+        const uint8_t REGEX_PHASE3_ID = 4;
+        const uint8_t REGEX_FREQUENCY_ID = 5;
     };
 
 }  // namespace provider_hydrophone

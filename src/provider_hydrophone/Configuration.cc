@@ -22,26 +22,26 @@ namespace provider_hydrophone
 
     void Configuration::Deserialize() {
 
-        ROS_INFO("Deserialize params");
+        ROS_DEBUG("Deserialize params");
 
         FindParameter("/hydrophone/distance_between_hydrophone", distanceBetweenHydrophone);
         FindParameter("/hydrophone/sound_speed", soundSpeed);
         FindParameter("/hydrophone/threshold", threshold);
         FindParameter("/hydrophone/gain", gain);
-
         FindParameter("/connection/tty_port", ttyPort);
 
-        ROS_INFO("End deserialize params");
+        ROS_DEBUG("End deserialize params");
     }
 
     template <typename TType>
     void Configuration::FindParameter(const std::string &paramName, TType &attribute) {
-        if (nh->hasParam("/provider_hydrophone" + paramName)) {
+        if (nh->hasParam("/provider_hydrophone" + paramName))
+        {
             nh->getParam("/provider_hydrophone" + paramName, attribute);
-        } else {
-            ROS_WARN_STREAM("Did not find /provider_hydrophone" + paramName
-                                    << ". Using default.");
+        }
+        else
+        {
+            ROS_WARN_STREAM("Did not find /provider_hydrophone" + paramName << ". Using default.");
         }
     }
-
 }
