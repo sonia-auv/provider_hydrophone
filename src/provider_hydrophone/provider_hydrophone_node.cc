@@ -181,7 +181,7 @@ namespace provider_hydrophone {
     acquiringData = false;
   }
 
-  void ProviderHydrophoneNode::setGain(unsigned int gain) {
+  void ProviderHydrophoneNode::setGain(uint32_t gain) {
 
     ROS_INFO("Setting a new gain on the hydrophone board");
 
@@ -206,7 +206,7 @@ namespace provider_hydrophone {
 
     // Give time to board to execute command
     usleep(WAITING_TIME);
-    drvier.writeData(std::to_string(gain) + ENTER_COMMAND_CHAR);
+    driver.writeData(std::to_string(gain) + ENTER_COMMAND_CHAR);
 
     // Give time to board to execute command
     usleep(WAITING_TIME);
@@ -216,7 +216,7 @@ namespace provider_hydrophone {
     ROS_INFO_STREAM("Gain has been setted : " << gain);
 
     // If we were acquiring data before, restart
-    if (isAcquiringData)
+    if (isAcquiringData())
     {
       ROS_DEBUG("Gain has been setted. Acquisition restart");
       startAcquireData();

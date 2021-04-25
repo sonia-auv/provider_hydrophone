@@ -65,11 +65,11 @@ namespace provider_hydrophone {
 
         void handlePing();
         void sendPing(std::shared_ptr<Ping> ping);
-
         bool isAcquiringData();
         void startAcquireData();
         void stopAcquireData();
         void setGain(uint32_t gain);
+        std::shared_ptr<Ping> getPing(); 
 
         uint16_t gain_ = 0;
         uint16_t current_gain_ = 0;
