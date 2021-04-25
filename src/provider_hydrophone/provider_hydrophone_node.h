@@ -33,7 +33,6 @@
 
 #include "drivers/UsbDriver.h"
 #include <sonia_common/PingMsg.h>
-#include "math.h"
 #include "Configuration.h"
 #include "Ping.h"
 

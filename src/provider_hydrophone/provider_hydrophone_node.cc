@@ -34,15 +34,14 @@ namespace provider_hydrophone {
 //------------------------------------------------------------------------------
 //
   ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
-      : nh_(nh),
-        configuration(nh),
-        driver(configuration.getTtyPort().c_str()),
-        gain_(configuration.getGain()),
-        current_gain_(configuration.getGain()),
-        soundSpeed(configuration.getSoundSpeed()),
-        distanceBetweenHydrophone(configuration.getDistanceBetweenHydrophone())
-      {
-
+    : nh_(nh),
+      configuration(nh),
+      driver(configuration.getTtyPort().c_str()),
+      gain_(configuration.getGain()),
+      current_gain_(configuration.getGain()),
+      soundSpeed(configuration.getSoundSpeed()),
+      distanceBetweenHydrophone(configuration.getDistanceBetweenHydrophone())
+  {
     server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
 
     HydroConfig config;
@@ -70,7 +69,8 @@ namespace provider_hydrophone {
 
     startAcquireData();
 
-    while (ros::ok()) {
+    while (ros::ok()) 
+    {
       ros::spinOnce();
 
       if (gain_ != current_gain_) {
@@ -85,10 +85,10 @@ namespace provider_hydrophone {
   }
 
   void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
-    {
-      ROS_INFO_STREAM("DynamicReconfigure callback. Old gain : " << gain_ << " new gain : " << config.Gain);
-      gain_ = config.Gain;
-    }
+  {
+    ROS_INFO_STREAM("DynamicReconfigure callback. Old gain : " << gain_ << " new gain : " << config.Gain);
+    gain_ = config.Gain;
+  }
 
   void ProviderHydrophoneNode::handlePing() 
   {
@@ -163,9 +163,9 @@ namespace provider_hydrophone {
 
     // Give time to board to execute command
     usleep(WAITING_TIME);
-
+    /* TO TEST WITHOUT
     driver.readData(200);
-    driver.readData(200);
+    driver.readData(200);*/
 
     acquiringData = true;
   }
@@ -183,7 +183,7 @@ namespace provider_hydrophone {
 
   void ProviderHydrophoneNode::setGain(uint32_t gain) {
 
-    ROS_INFO("Setting a new gain on the hydrophone board");
+    ROS_DEBUG("Setting a new gain on the hydrophone board");
 
     if (gain > MAX_GAIN_VALUE)
     {
@@ -193,7 +193,7 @@ namespace provider_hydrophone {
     // If is acquiring data, stop
     if (isAcquiringData())
     {
-      ROS_INFO("We were acquiring data. Acquisition will stop for a moment");
+      ROS_DEBUG("We were acquiring data. Acquisition will stop for a moment");
       stopAcquireData();
     }
 
@@ -211,7 +211,8 @@ namespace provider_hydrophone {
     // Give time to board to execute command
     usleep(WAITING_TIME);
 
-    driver.readData(200);
+    /*TO TEST WITHOUT
+    driver.readData(200);*/
 
     ROS_INFO_STREAM("Gain has been setted : " << gain);
 
@@ -242,12 +243,12 @@ namespace provider_hydrophone {
 
       std::shared_ptr<Ping> ping(new Ping());
 
-      ping->setFrequency(std::stoi(matcher[REGEX_PHASEREF_ID]));
-      ping->setAmplitude(std::stoi(matcher[REGEX_PHASE1_ID]));
-      ping->setNoise(std::stoi(matcher[REGEX_PHASE2_ID]));
+      ping->setFrequency(std::stod(matcher[REGEX_PHASEREF_ID]));
+      ping->setAmplitude(std::stod(matcher[REGEX_PHASE1_ID]));
+      ping->setNoise(std::stod(matcher[REGEX_PHASE2_ID]));
 
-      ping->setChannelReferenceReal(std::stoi(matcher[REGEX_PHASE3_ID]));
-      ping->setChannelReferenceImage(std::stoi(matcher[REGEX_FREQUENCY_ID]));
+      ping->setChannelReferenceReal(std:stod(matcher[REGEX_PHASE3_ID]));
+      ping->setChannelReferenceImage(std::stod(matcher[REGEX_FREQUENCY_ID]));
 
       return ping;
     } 
