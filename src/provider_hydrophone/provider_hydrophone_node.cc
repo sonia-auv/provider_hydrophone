@@ -37,8 +37,6 @@ namespace provider_hydrophone {
       : nh_(nh),
         configuration(nh),
         driver(configuration.getTtyPort().c_str()),
-        threshold_(configuration.getThreshold()),
-        current_threshold_(configuration.getThreshold()),
         gain_(configuration.getGain()),
         current_gain_(configuration.getGain()),
         soundSpeed(configuration.getSoundSpeed()),
@@ -48,14 +46,12 @@ namespace provider_hydrophone {
     server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
 
     HydroConfig config;
-    config.Threshold = current_threshold_;
     config.Gain = current_gain_;
     CallBackDynamicReconfigure(config, 0);
 
     pingPub = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
 
-    driver.setThreshold(current_threshold_);
-    driver.setGain(current_gain_);
+    setGain(current_gain_);
   }
 
   //------------------------------------------------------------------------------
@@ -160,83 +156,81 @@ namespace provider_hydrophone {
       pingPub.publish(pingMsg);
   }
 
-bool ProviderHydrophoneNode::isAcquiringData() {
+  bool ProviderHydrophoneNode::isAcquiringData() 
+  {
     return acquiringData;
-}
+  }
 
-void ProviderHydrophoneNode::startAcquireData() {
-
+  void ProviderHydrophoneNode::startAcquireData() 
+  {
     ROS_DEBUG("Start acquiring data");
 
-    if (isAcquiringData())
-        return;
+    if (!isAcquiringData()) return;
 
-    writeData(SET_NORMAL_MODE_COMMAND);
+    driver.writeData(SET_NORMAL_MODE_COMMAND);
 
     // Give time to board to execute command
     usleep(WAITING_TIME);
 
-    readData(200);
-    readData(200);
+    driver.readData(200);
+    driver.readData(200);
 
     acquiringData = true;
+  }
 
-}
-
-void ProviderHydrophoneNode::stopAcquireData() {
+  void ProviderHydrophoneNode::stopAcquireData() {
 
     ROS_DEBUG("Stop acquiring data");
 
-    if (!isAcquiringData())
-        return;
+    if (!isAcquiringData()) return;
 
-    writeData(EXIT_COMMAND);
+    driver.writeData(EXIT_COMMAND);
 
     acquiringData = false;
-}
+  }
 
   void ProviderHydrophoneNode::setGain(unsigned int gain) {
 
     ROS_INFO("Setting a new gain on the hydrophone board");
 
     if (gain > MAX_GAIN_VALUE)
-        gain = MAX_GAIN_VALUE;
-
-    bool isAcquiringData = this->isAcquiringData();
-
-    // If is acquiring data, stop
-    if (isAcquiringData)
     {
-        ROS_INFO("We were acquiring data. Acquisition will stop for a moment");
-        stopAcquireData();
+      gain = MAX_GAIN_VALUE;
+    }
+    
+    // If is acquiring data, stop
+    if (isAcquiringData())
+    {
+      ROS_INFO("We were acquiring data. Acquisition will stop for a moment");
+      stopAcquireData();
     }
 
-    writeData(SET_GAIN_COMMAND);
+    driver.writeData(SET_GAIN_COMMAND);
 
     // Give time to board to execute command
     usleep(WAITING_TIME);
 
-    readData(200);
+    driver.readData(200);
 
     // Give time to board to execute command
     usleep(WAITING_TIME);
-    writeData(std::to_string(gain) + ENTER_COMMAND_CHAR);
+    drvier.writeData(std::to_string(gain) + ENTER_COMMAND_CHAR);
 
     // Give time to board to execute command
     usleep(WAITING_TIME);
 
-    readData(200);
+    driver.readData(200);
 
     ROS_INFO_STREAM("Gain has been setted : " << gain);
 
     // If we were acquiring data before, restart
     if (isAcquiringData)
     {
-        ROS_INFO("Gain has been setted. Acquisition restart");
-        startAcquireData();
+      ROS_DEBUG("Gain has been setted. Acquisition restart");
+      startAcquireData();
     }
 
-    ROS_INFO("End of setting a gain on the hydrophone board");
+    ROS_DEBUG("End of setting a gain on the hydrophone board");
   }
 
   std::shared_ptr<Ping> ProviderHydrophoneNode::getPing() 
@@ -252,29 +246,29 @@ void ProviderHydrophoneNode::stopAcquireData() {
 
     if (searchFound)
     {
-        ROS_DEBUG("Ping found with the REGEX");
+      ROS_DEBUG("Ping found with the REGEX");
 
-        std::shared_ptr<Ping> ping(new Ping());
+      std::shared_ptr<Ping> ping(new Ping());
 
-        ping->setFrequency(std::stoi(matcher[REGEX_FREQUENCY_ID]));
-        ping->setAmplitude(std::stoi(matcher[REGEX_AMPLITUDE_ID]));
-        ping->setNoise(std::stoi(matcher[REGEX_NOISE_ID]));
+      ping->setFrequency(std::stoi(matcher[REGEX_FREQUENCY_ID]));
+      ping->setAmplitude(std::stoi(matcher[REGEX_AMPLITUDE_ID]));
+      ping->setNoise(std::stoi(matcher[REGEX_NOISE_ID]));
 
-        ping->setChannelReferenceReal(std::stoi(matcher[REGEX_CHANNEL_REFERENCE_REAL_ID]));
-        ping->setChannelReferenceImage(std::stoi(matcher[REGEX_CHANNEL_REFERENCE_IMAGE_ID]));
+      ping->setChannelReferenceReal(std::stoi(matcher[REGEX_CHANNEL_REFERENCE_REAL_ID]));
+      ping->setChannelReferenceImage(std::stoi(matcher[REGEX_CHANNEL_REFERENCE_IMAGE_ID]));
 
-        ping->setChannel1Real(std::stoi(matcher[REGEX_CHANNEL_1_REAL_ID]));
-        ping->setChannel1Image(std::stoi(matcher[REGEX_CHANNEL_1_IMAGE_ID]));
+      ping->setChannel1Real(std::stoi(matcher[REGEX_CHANNEL_1_REAL_ID]));
+      ping->setChannel1Image(std::stoi(matcher[REGEX_CHANNEL_1_IMAGE_ID]));
 
-        ping->setChannel2Real(std::stoi(matcher[REGEX_CHANNEL_2_REAL_ID]));
-        ping->setChannel2Image(std::stoi(matcher[REGEX_CHANNEL_2_IMAGE_ID]));
+      ping->setChannel2Real(std::stoi(matcher[REGEX_CHANNEL_2_REAL_ID]));
+      ping->setChannel2Image(std::stoi(matcher[REGEX_CHANNEL_2_IMAGE_ID]));
 
-        return ping;
+      return ping;
     } 
     else 
     {
-        ROS_DEBUG("No ping found with the REGEX");
-        return std::shared_ptr<Ping>(nullptr);
+      ROS_DEBUG("No ping found with the REGEX");
+      return std::shared_ptr<Ping>(nullptr);
     }
   }
 

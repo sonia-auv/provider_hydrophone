@@ -75,7 +75,7 @@ namespace provider_hydrophone {
         uint16_t current_gain_ = 0;
         uint16_t soundSpeed = 0;
         double_t distanceBetweenHydrophone = 0.0;
-        bool isAcquiring = false;
+        bool acquiringData = false;
 
         //--------------------------------------------------------
         //-------------------------CONST--------------------------
