@@ -18,13 +18,13 @@ namespace provider_hydrophone
 
         bool isConnected();
         void closeConnection();
+        bool writeData(std::string data);
+        std::string readData(unsigned int length);
 
     private:
 
         bool connect(const char* deviceTty);
         void configurePortSetting();
-        bool writeData(std::string data);
-        std::string readData(unsigned int length);
         std::string readLine();
 
         int tty = 0;

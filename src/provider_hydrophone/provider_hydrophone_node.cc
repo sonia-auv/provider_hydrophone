@@ -68,19 +68,14 @@ namespace provider_hydrophone {
   {
     ros::Rate r(100);  // 100 hz
 
-    driver.startAcquireData();
+    startAcquireData();
 
     while (ros::ok()) {
       ros::spinOnce();
 
-      if (threshold_ != current_threshold_) {
-        current_threshold_ = threshold_;
-        driver.setThreshold(current_threshold_);
-      }
-
       if (gain_ != current_gain_) {
         current_gain_ = gain_;
-        driver.setGain(current_gain_);
+        setGain(current_gain_);
       }
 
       handlePing();
@@ -91,21 +86,19 @@ namespace provider_hydrophone {
 
   void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
     {
-      ROS_INFO_STREAM("DynamicReconfigure callback. Old threshold : " << threshold_ << " new threshold : " << config.Threshold);
       ROS_INFO_STREAM("DynamicReconfigure callback. Old gain : " << gain_ << " new gain : " << config.Gain);
-      threshold_ = config.Threshold;
       gain_ = config.Gain;
     }
 
   void ProviderHydrophoneNode::handlePing() 
   {
-    auto ping = driver.getPing();
+    auto ping = getPing();
 
     while (ping != nullptr)
     {
         sendPing(ping);
 
-        ping = driver.getPing();
+        ping = getPing();
 
     }
   }
@@ -135,7 +128,6 @@ namespace provider_hydrophone {
       unsigned int fullFrequency = ping->getFrequency() * 1000;
 
       double lambda = (double) soundSpeed / fullFrequency;
-
 
       double t2 = (dephase2 / (2 * M_PI)) * lambda;
 

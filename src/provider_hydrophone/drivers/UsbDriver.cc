@@ -12,7 +12,6 @@
 
 namespace provider_hydrophone
 {
-
     UsbDriver::UsbDriver(const char* deviceTty) {
 
         if (!connect(deviceTty))
