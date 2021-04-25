@@ -241,16 +241,8 @@ namespace provider_hydrophone {
     {
       ROS_DEBUG("Ping found with the REGEX");
 
-      std::shared_ptr<Ping> ping(new Ping());
-
-      ping->setFrequency(std::stod(matcher[REGEX_PHASEREF_ID]));
-      ping->setAmplitude(std::stod(matcher[REGEX_PHASE1_ID]));
-      ping->setNoise(std::stod(matcher[REGEX_PHASE2_ID]));
-
-      ping->setChannelReferenceReal(std:stod(matcher[REGEX_PHASE3_ID]));
-      ping->setChannelReferenceImage(std::stod(matcher[REGEX_FREQUENCY_ID]));
-
-      return ping;
+      return std::shared_ptr<Ping> ping(new Ping(std::stod(matcher[REGEX_PHASEREF_ID]), std::stod(matcher[REGEX_PHASE1_ID]),
+              std::stod(matcher[REGEX_PHASE2_ID]), std::stod(matcher[REGEX_PHASE3_ID]), std::stod(matcher[REGEX_FREQUENCY_ID])));
     } 
     else 
     {

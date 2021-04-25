@@ -23,7 +23,7 @@ namespace provider_hydrophone {
         void calculateResults(double_t phaseRef, double_t phase1, double_t phase2, double_t phase3);
 
         double_t frequency_; // frequency in kHz
-        double_t heading_; //
+        double_t heading_;
         double_t elevation_;
     };
 }
