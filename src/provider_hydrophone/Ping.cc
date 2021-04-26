@@ -63,6 +63,19 @@ namespace provider_hydrophone
 
     void Ping::calculateElevation(double_t x, double_t y)
     {
+        x = pow(x, 2.0);
+        y = pow(y, 2.0);
 
+        double_t frequency_2pi = 0, constant = 1500.0, t1 = 0.0, t2 = 0.0;
+
+        frequency_2pi = frequency_ * 2 * M_PI;
+
+        t1 = frequency_2pi / constant;
+        t2 = pow(t1, 2.0);
+
+        t2 = t2 - y - x;
+        t2 = sqrt(t2);
+
+        elevation_ = acos(t2/t1);
     }
 }
