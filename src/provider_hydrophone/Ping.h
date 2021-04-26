@@ -6,7 +6,7 @@
 #define PROVIDER_HYDROPHONE_PING_H
 
 #include <ros/ros.h>
-#include <Eigen/Eigen>
+#include <eigen3/Eigen/Eigen>
 #include "math.h"
 
 namespace provider_hydrophone {
@@ -14,6 +14,9 @@ namespace provider_hydrophone {
     class Ping {
 
     public:
+        typedef Eigen::Matrix<double, 3, 3> Matrix3d;
+        typedef Eigen::Matrix<double, 3, 1> Vector3d;
+
         Ping(double_t phaseRef, double_t phase1, double_t phase2, double_t phase3, double_t index);
         ~Ping();
 
@@ -21,11 +24,11 @@ namespace provider_hydrophone {
 
     private:
 
-        void calculateResults(double_t phaseRef, double_t phase1, double_t phase2, double_t phase3);
+        void calculateElevation(double_t x, double_t y);
 
-        double_t frequency_; // frequency in kHz
-        double_t heading_;
-        double_t elevation_;
+        double_t frequency_ = 0; // frequency in kHz
+        double_t heading_ = 0; // heading in degrees
+        double_t elevation_ = 0; // elevation in degress
 
     //--------------------------------------------------------
     //-------------------------CONST--------------------------
@@ -33,6 +36,10 @@ namespace provider_hydrophone {
 
         const double_t sample_rate = 256000.0;
         const double_t fft_length = 256.0;
+
+        Matrix3d hydrophone_position;
+        Vector3d dephasage;
+        Vector3d alpha;
 
     };
 }

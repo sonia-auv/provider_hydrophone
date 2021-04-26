@@ -109,41 +109,9 @@ namespace provider_hydrophone {
 
       pingMsg.header.stamp = ros::Time::now();
 
-      int chanRefReal = ping->getChannelReferenceReal();
-      int chanRefImage = ping->getChannelReferenceImage();
-      int chan1Real = ping->getChannel1Real();
-      int chan1Image = ping->getChannel1Image();
-      int chan2Real = ping->getChannel2Real();
-      int chan2Image = ping->getChannel2Image();
+      double_t heading, elevation, frequency;
 
-      double phaseRef = atan2(chanRefImage, chanRefReal);
-      double phase1 = atan2(chan1Image, chan1Real);
-      double phase2 = atan2(chan2Image, chan2Real);
-
-      double dephase1 = phase1 - phaseRef;
-      double dephase2 = phase2 - phaseRef;
-
-      double heading = atan2(dephase1, dephase2);
-
-      unsigned int fullFrequency = ping->getFrequency() * 1000;
-
-      double lambda = (double) soundSpeed / fullFrequency;
-
-      double t2 = (dephase2 / (2 * M_PI)) * lambda;
-
-      double elevation = acos(t2/(cos(heading) * distanceBetweenHydrophone));
-
-      pingMsg.raw_data.channelReferenceReal = chanRefReal;
-      pingMsg.raw_data.channelReferenceImage = chanRefImage;
-      pingMsg.raw_data.channel1Real = chan1Real;
-      pingMsg.raw_data.channel1Image = chan1Image;
-      pingMsg.raw_data.channel2Real = chan2Real;
-      pingMsg.raw_data.channel2Image = chan2Image;
-      pingMsg.frequency = ping->getFrequency();
-      pingMsg.heading = heading;
-      pingMsg.elevation = elevation;
-      pingMsg.amplitude = ping->getAmplitude();
-      pingMsg.noise = ping->getNoise();
+      ping.getResults(&heading, &elevation, &frequency);
 
       pingPub.publish(pingMsg);
   }
