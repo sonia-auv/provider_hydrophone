@@ -92,26 +92,26 @@ namespace provider_hydrophone {
 
   void ProviderHydrophoneNode::handlePing() 
   {
-    auto ping = getPing();
+    Ping ping;
 
-    while (ping != nullptr)
+    getPing(&ping);
+
+    while (!(ping.isEmpty()))
     {
-        sendPing(ping);
+        sendPing(&ping);
 
-        ping = getPing();
-
+        getPing(&ping);
     }
   }
 
-  void ProviderHydrophoneNode::sendPing(std::shared_ptr<Ping> ping)
+  void ProviderHydrophoneNode::sendPing(Ping *ping)
   {
       sonia_common::PingMsg pingMsg;
+      double_t heading, elevation, frequency;
 
       pingMsg.header.stamp = ros::Time::now();
 
-      double_t heading, elevation, frequency;
-
-      ping.getResults(&heading, &elevation, &frequency);
+      ping->getResults(&heading, &elevation, &frequency);
 
       pingPub.publish(pingMsg);
   }
@@ -194,7 +194,7 @@ namespace provider_hydrophone {
     ROS_DEBUG("End of setting a gain on the hydrophone board");
   }
 
-  std::shared_ptr<Ping> ProviderHydrophoneNode::getPing() 
+  void ProviderHydrophoneNode::getPing(Ping* ping) 
   {
     ROS_DEBUG("Try to get a ping");
 
@@ -209,13 +209,12 @@ namespace provider_hydrophone {
     {
       ROS_DEBUG("Ping found with the REGEX");
 
-      return std::shared_ptr<Ping> ping(new Ping(std::stod(matcher[REGEX_PHASEREF_ID]), std::stod(matcher[REGEX_PHASE1_ID]),
-              std::stod(matcher[REGEX_PHASE2_ID]), std::stod(matcher[REGEX_PHASE3_ID]), std::stod(matcher[REGEX_INDEX_ID])));
-    } 
-    else 
+      ping->FillPing(std::stod(matcher[REGEX_PHASEREF_ID]), std::stod(matcher[REGEX_PHASE1_ID]), std::stod(matcher[REGEX_PHASE2_ID]), 
+                  std::stod(matcher[REGEX_PHASE3_ID]), std::stod(matcher[REGEX_INDEX_ID]));
+    }
+    else
     {
       ROS_DEBUG("No ping found with the REGEX");
-      return std::shared_ptr<Ping>(nullptr);
     }
   }
 

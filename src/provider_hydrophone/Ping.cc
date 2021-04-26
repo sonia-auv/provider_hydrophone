@@ -7,13 +7,24 @@
 namespace provider_hydrophone
 {
 
-    Ping::Ping(double_t phaseRef, double_t phase1, double_t phase2, double_t phase3, double_t index)
+    Ping::Ping()
     {
-        hydrophone_position <<   47.1404520791032,  -94.2809041582063,  47.1404520791032
-                                -47.1404520791032,  0,                  47.1404520791032
+        empty = true;
+    }
+
+    Ping::~Ping() 
+    {
+    }
+
+    void Ping::FillPing(double_t phaseRef, double_t phase1, double_t phase2, double_t phase3, double_t index)
+    {
+        empty = false;
+        
+        hydrophone_position<<   47.1404520791032,  -94.2809041582063,  47.1404520791032,
+                                -47.1404520791032,  0,                  47.1404520791032,
                                 1000.0,             1000.0,             1000.0;
         
-        dephasage <<    phase1 - phaseRef,
+        dephasage<<     phase1 - phaseRef,
                         phase2 - phaseRef,
                         phase3 - phaseRef;
 
@@ -28,15 +39,26 @@ namespace provider_hydrophone
         calculateElevation(x,y);
     }
 
-    Ping::~Ping() 
+    void Ping::FillPing(double_t heading, double_t x, double_t y, double_t frequency)
     {
+        empty = false;
+
+        frequency_ = frequency;
+        heading_ = heading;
+
+        calculateElevation(x,y);
     }
 
-    void getResults(double_t *heading, double_t *elevation, double_t *frequency)
+    void Ping::getResults(double_t *heading, double_t *elevation, double_t *frequency)
     {
         *heading = heading_;
         *elevation = elevation_;
         *frequency = frequency_;
+    }
+
+    bool Ping::isEmpty()
+    {
+        return empty;
     }
 
     void Ping::calculateElevation(double_t x, double_t y)

@@ -64,12 +64,12 @@ namespace provider_hydrophone {
         dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
 
         void handlePing();
-        void sendPing(std::shared_ptr<Ping> ping);
+        void sendPing(Ping *ping);
         bool isAcquiringData();
         void startAcquireData();
         void stopAcquireData();
         void setGain(uint32_t gain);
-        std::shared_ptr<Ping> getPing(); 
+        void getPing(Ping *ping);
 
         uint16_t gain_ = 0;
         uint16_t current_gain_ = 0;
