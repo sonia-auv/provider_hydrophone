@@ -91,7 +91,7 @@ namespace provider_hydrophone {
 
         const std::string EXIT_COMMAND = "q";
 
-        const uint16_t WAITING_TIME = 100000;
+        const uint32_t WAITING_TIME = 100000;
 
         const char * REGEX = "^[0-9]*\\.[0-9]+_[0-9]*\\.[0-9]+_[0-9]*\\.[0-9]+_[0-9]*\\.[0-9]+_[0-9]+_$";
 
