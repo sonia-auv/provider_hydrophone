@@ -40,47 +40,9 @@ Docker version 19.03.5, build 633a0ea
 
 It means you have it installed. If not follow instructions on how to install it for your OS.
 
-### Installing
+## UML
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
+Here is the UML linked to this provider : [Lucidchart UML](https://lucid.app/publicSegments/view/55152d26-6365-45a3-a816-881156453cf4)
 
 ## Built With
 
