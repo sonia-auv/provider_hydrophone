@@ -66,7 +66,7 @@ namespace provider_hydrophone
         x = pow(x, 2.0);
         y = pow(y, 2.0);
 
-        double_t frequency_2pi = 0, constant = 1500.0, t1 = 0.0, t2 = 0.0;
+        double_t frequency_2pi = 0, t1 = 0.0, t2 = 0.0;
 
         frequency_2pi = frequency_ * 2 * M_PI;
 

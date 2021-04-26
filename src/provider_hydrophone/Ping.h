@@ -40,6 +40,7 @@ namespace provider_hydrophone {
 
         double_t sample_rate = 256000.0;
         double_t fft_length = 256.0;
+        double_t constant = 1500.0;
 
         Matrix3d hydrophone_position;
         Vector3d dephasage;
