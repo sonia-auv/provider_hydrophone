@@ -25,7 +25,7 @@ namespace provider_hydrophone
 
         heading_ = atan2(y,x);
 
-        //calculateElevation(x,y);
+        calculateElevation(x,y);
     }
 
     Ping::~Ping() {
@@ -34,9 +34,9 @@ namespace provider_hydrophone
 
     void getResults(double_t *heading, double_t *elevation, double_t *frequency)
     {
-        heading = &heading_;
-        elevation = &elevation_;
-        frequency = &frequency_;
+        *heading = heading_;
+        *elevation = elevation_;
+        *frequency = frequency_;
     }
 
     void Ping::calculateElevation(double_t x, double_t y)
