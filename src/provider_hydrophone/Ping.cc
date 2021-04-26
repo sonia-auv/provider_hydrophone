@@ -28,8 +28,8 @@ namespace provider_hydrophone
         calculateElevation(x,y);
     }
 
-    Ping::~Ping() {
-
+    Ping::~Ping() 
+    {
     }
 
     void getResults(double_t *heading, double_t *elevation, double_t *frequency)
