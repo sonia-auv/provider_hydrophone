@@ -242,7 +242,7 @@ namespace provider_hydrophone {
       ROS_DEBUG("Ping found with the REGEX");
 
       return std::shared_ptr<Ping> ping(new Ping(std::stod(matcher[REGEX_PHASEREF_ID]), std::stod(matcher[REGEX_PHASE1_ID]),
-              std::stod(matcher[REGEX_PHASE2_ID]), std::stod(matcher[REGEX_PHASE3_ID]), std::stod(matcher[REGEX_FREQUENCY_ID])));
+              std::stod(matcher[REGEX_PHASE2_ID]), std::stod(matcher[REGEX_PHASE3_ID]), std::stod(matcher[REGEX_INDEX_ID])));
     } 
     else 
     {

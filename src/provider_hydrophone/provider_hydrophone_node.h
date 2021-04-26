@@ -99,7 +99,7 @@ namespace provider_hydrophone {
         const uint8_t REGEX_PHASE1_ID = 2;
         const uint8_t REGEX_PHASE2_ID = 3;
         const uint8_t REGEX_PHASE3_ID = 4;
-        const uint8_t REGEX_FREQUENCY_ID = 5;
+        const uint8_t REGEX_INDEX_ID = 5;
     };
 
 }  // namespace provider_hydrophone

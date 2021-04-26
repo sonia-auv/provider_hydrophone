@@ -7,9 +7,9 @@
 namespace provider_hydrophone
 {
 
-    Ping::Ping(double_t phaseRef, double_t phase1, double_t phase2, double_t phase3, double_t frequency)
+    Ping::Ping(double_t phaseRef, double_t phase1, double_t phase2, double_t phase3, double_t index)
     {
-        frequency_ = frequency * 1.0;
+        frequency_ = index * sample_rate / fft_length;
     }
 
     Ping::~Ping() {
