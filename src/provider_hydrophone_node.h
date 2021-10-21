@@ -48,15 +48,10 @@ namespace provider_hydrophone {
         //==========================================================================
         // P U B L I C   C / D T O R S
 
-        explicit ProviderHydrophoneNode(const ros::NodeHandlePtr &nh);
-
+        ProviderHydrophoneNode(const ros::NodeHandlePtr &nh);
         ~ProviderHydrophoneNode();
 
-        /// Taking care of the spinning of the ROS thread.
-        /// Each iteration of the loop, this will take the objects in the object
-        /// registery, empty it and publish the objects.
         void Spin();
-        //void CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level);
 
     private:
         
@@ -64,15 +59,18 @@ namespace provider_hydrophone {
         Configuration configuration_;
         Serial serialConnection_;
         ros::Publisher pingPublisher_;
-        //dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
+        ros::ServiceServer settingsHydro_;
 
         void readThread();
         void h1RegisterThread();
+        bool changeSettings();
 
         bool isAcquiringData();
         void startAcquireNormalMode();
         void stopAcquireData();
-        //void setGain(uint8_t gain);
+        bool setGain(uint8_t gain);
+        bool setSNRThreshold(uint32_t threshold);
+        bool setSignalThreshold(uint32_t threshold);
         float_t fixedToFloat(uint32_t data);
 
         uint8_t gain_ = 0;
@@ -103,7 +101,9 @@ namespace provider_hydrophone {
         const std::string SET_NORMAL_MODE_COMMAND = "1" + ENTER_COMMAND_CHAR;
         const std::string SET_TEST_PING_MODE_COMMAND = "2" + ENTER_COMMAND_CHAR;
         const std::string SET_GAIN_COMMAND = "3" + ENTER_COMMAND_CHAR;
-        const std::string SET_RAW_DATA_MODE_COMMAND = "4" + ENTER_COMMAND_CHAR;
+        const std::string SET_SNR_THRESHOLD = "4" + ENTER_COMMAND_CHAR;
+        const std::string SET_SIGNAL_THRESHOLD = "5" + ENTER_COMMAND_CHAR;
+        const std::string SET_RAW_DATA_MODE_COMMAND = "6" + ENTER_COMMAND_CHAR;
 
         const std::string EXIT_COMMAND = "q";
     };

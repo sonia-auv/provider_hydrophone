@@ -39,17 +39,12 @@ namespace provider_hydrophone {
       configuration_(nh),
       serialConnection_(configuration_.getTtyPort())
   {
-    //server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
-
-    //HydroConfig config;
-    //CallBackDynamicReconfigure(config, 0);
-
     pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
 
     readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
     h1ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h1RegisterThread, this));
 
-    //setGain(current_gain_);
+    settingsHydro_ = nh_->advertiseService("/provider_hydrophone/change_settings", &ProviderHydrophoneNode::changeSettings, this);
   }
 
   //------------------------------------------------------------------------------
@@ -76,12 +71,6 @@ namespace provider_hydrophone {
       r.sleep();
     }
   }
-
-  /*void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
-  {
-    ROS_INFO_STREAM("DynamicReconfigure callback. Old gain : " << gain_ << " new gain : " << config.Gain);
-    gain_ = config.Gain;
-  }*/
 
   void ProviderHydrophoneNode::readThread()
   {
@@ -123,7 +112,7 @@ namespace provider_hydrophone {
 
   void ProviderHydrophoneNode::h1RegisterThread()
   {
-    ros::Rate r(5);
+    ros::Rate r(2); // 2 Hz
     Ping ping;
 
     while(!ros::isShuttingDown())
@@ -161,7 +150,7 @@ namespace provider_hydrophone {
           uint32_t y_int = fixedToFloat(stoi(y));
 
           ping_msg.heading = ping.calculateHeading(x_int, y_int);
-          ping_msg.elevation = ping.calculateElevation(x_int, y_int, ping_msg.frequency);
+          ping_msg.elevation = ping.calculateElevation(x_int, y_int, stoi(frequency));
 
           pingPublisher_.publish(ping_msg);
         }
@@ -172,6 +161,11 @@ namespace provider_hydrophone {
       }
       r.sleep();
     }
+  }
+
+  bool changeSettings()
+  {
+    
   }
 
   bool ProviderHydrophoneNode::isAcquiringData() 
@@ -211,51 +205,46 @@ namespace provider_hydrophone {
     acquiringNormalData_ = false;
   }
 
-  float_t ProviderHydrophoneNode::fixedToFloat(uint32_t data)
-  {
-    return ((float_t) data / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
-  }
-/*
-  void ProviderHydrophoneNode::setGain(uint32_t gain) {
+  bool ProviderHydrophoneNode::setGain(uint8_t gain) {
 
-    ROS_DEBUG("Setting a new gain on the hydrophone board");
+    ROS_INFO_STREAM("Setting a new gain on the hydrophone board");
 
-    if (gain > MAX_GAIN_VALUE)
+    if (gain > 7 && gain < 0)
     {
-      gain = MAX_GAIN_VALUE;
+      return false;
     }
     
     // If is acquiring data, stop
     if (isAcquiringData())
     {
-      ROS_DEBUG("We were acquiring data. Acquisition will stop for a moment");
+      ROS_INFO_STREAM("We were acquiring data. Acquisition will stop for a moment");
       stopAcquireData();
     }
 
-    driver.writeData(SET_GAIN_COMMAND);
+    serialConnection_.transmit(SET_GAIN_COMMAND);
 
     // Give time to board to execute command
-    usleep(WAITING_TIME);
+    ros::Duration(0.1).sleep();
 
-    driver.readData(200);
-
-    // Give time to board to execute command
-    usleep(WAITING_TIME);
-    driver.writeData(std::to_string(gain) + ENTER_COMMAND_CHAR);
+    serialConnection_.transmit(std::to_string(gain) + ENTER_COMMAND_CHAR);
 
     // Give time to board to execute command
-    usleep(WAITING_TIME);
+    ros::Duration(0.1).sleep();
 
-    /*ROS_INFO_STREAM("Gain has been setted : " << gain);
+    ROS_INFO_STREAM("Gain has been setted : " << gain);
 
     // If we were acquiring data before, restart
     if (isAcquiringData())
     {
-      ROS_DEBUG("Gain has been setted. Acquisition restart");
-      startAcquireData();
+      ROS_INFO_STREAM("Gain has been setted. Acquisition restart");
+      startAcquireNormalMode();
     }
+    return true;
+  }
 
-    ROS_DEBUG("End of setting a gain on the hydrophone board");
-  }*/
+  float_t ProviderHydrophoneNode::fixedToFloat(uint32_t data)
+  {
+    return ((float_t) data / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
+  }
 
 }  // namespace provider_hydrophone
