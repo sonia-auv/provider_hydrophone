@@ -71,7 +71,7 @@ namespace provider_hydrophone {
         bool isAcquiringData();
         void startAcquireNormalMode();
         void stopAcquireData();
-        void setGain(uint8_t gain);
+        //void setGain(uint8_t gain);
 
         uint8_t gain_ = 0;
         uint8_t current_gain_ = 0;
