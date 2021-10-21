@@ -145,8 +145,25 @@ namespace provider_hydrophone {
 
           ping_msg.header.stamp = ros::Time::now();
 
-          
+          std::getline(ss, debug, ',');
+          std::getline(ss, debug, ',');
 
+          ping_msg.debug = stoi(debug);
+
+          std::getline(ss, frequency, ',');
+
+          ping_msg.frequency = stoi(frequency);
+
+          std::getline(ss, x, ',');
+          std::getline(ss, y, '\n');
+
+          uint32_t x_int = fixedToFloat(stoi(x));
+          uint32_t y_int = fixedToFloat(stoi(y));
+
+          ping_msg.heading = ping.calculateHeading(x_int, y_int);
+          ping_msg.elevation = ping.calculateElevation(x_int, y_int, ping_msg.frequency);
+
+          pingPublisher_.publish(ping_msg);
         }
       }
       catch(...)
@@ -192,6 +209,11 @@ namespace provider_hydrophone {
     serialConnection_.flush();
     
     acquiringNormalData_ = false;
+  }
+
+  float_t ProviderHydrophoneNode::fixedToFloat(uint32_t data)
+  {
+    return ((float_t) data / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
   }
 /*
   void ProviderHydrophoneNode::setGain(uint32_t gain) {

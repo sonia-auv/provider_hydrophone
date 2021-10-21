@@ -17,19 +17,18 @@ namespace provider_hydrophone {
 
         Ping();
         ~Ping();
-
-    private:
-
         float_t calculateElevation(float_t x, float_t y, float_t frequency);
         float_t calculateHeading(float_t x, float_t y);
-        
+
+    private:
+    
     //--------------------------------------------------------
     //-------------------------CONST--------------------------
     //--------------------------------------------------------
 
-        float_t sample_rate = 256000.0;
-        float_t fft_length = 256.0;
-        float_t constant = 1500.0;
+        const float_t sample_rate = 256000.0;
+        const float_t fft_length = 256.0;
+        const float_t constant = 1500.0;
     };
 }
 

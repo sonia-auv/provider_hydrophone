@@ -37,6 +37,8 @@
 #include "Ping.h"
 #include "drivers/serial.h"
 
+#define FIXED_POINT_FRACTIONAL_BITS 19
+
 namespace provider_hydrophone {
 
     class ProviderHydrophoneNode {
@@ -72,6 +74,7 @@ namespace provider_hydrophone {
         void startAcquireNormalMode();
         void stopAcquireData();
         //void setGain(uint8_t gain);
+        float_t fixedToFloat(uint32_t data);
 
         uint8_t gain_ = 0;
         uint8_t current_gain_ = 0;
@@ -104,7 +107,6 @@ namespace provider_hydrophone {
         const std::string SET_RAW_DATA_MODE_COMMAND = "4" + ENTER_COMMAND_CHAR;
 
         const std::string EXIT_COMMAND = "q";
-
     };
 
 }  // namespace provider_hydrophone
