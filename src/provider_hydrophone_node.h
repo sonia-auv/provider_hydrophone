@@ -26,8 +26,7 @@
 #ifndef PROVIDER_HYDROPHONE_NODE_H_
 #define PROVIDER_HYDROPHONE_NODE_H_
 
-#include <ros/node_handle.h>
-#include <regex>
+#include <ros/ros.h>
 #include <dynamic_reconfigure/server.h>
 #include <thread>
 #include <condition_variable>
