@@ -27,11 +27,11 @@
 #define PROVIDER_HYDROPHONE_NODE_H_
 
 #include <ros/ros.h>
-#include <dynamic_reconfigure/server.h>
 #include <thread>
 #include <condition_variable>
 
 #include <sonia_common/PingMsg.h>
+#include <sonia_common/SetHydroSettings.h>
 #include "Configuration.h"
 #include "Ping.h"
 #include "drivers/serial.h"
@@ -63,13 +63,13 @@ namespace provider_hydrophone {
 
         void readThread();
         void h1RegisterThread();
-        bool changeSettings();
+        bool changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res);
 
         bool isAcquiringData();
         void startAcquireNormalMode();
         void stopAcquireData();
         bool setGain(uint8_t gain);
-        bool setSNRThreshold(uint32_t threshold);
+        bool setSNRThreshold(uint8_t threshold);
         bool setSignalThreshold(uint32_t threshold);
         float_t fixedToFloat(uint32_t data);
 

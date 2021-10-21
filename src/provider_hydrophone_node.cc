@@ -163,9 +163,51 @@ namespace provider_hydrophone {
     }
   }
 
-  bool changeSettings()
+  bool ProviderHydrophoneNode::changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res)
   {
+    bool result = false;
+
+    if(req.setting < req.SET_GAIN || req.setting > req.SET_SIGNAL_THRESHOLD)
+    {
+      return false;
+    }
+
+    // If is acquiring data, stop
+    if (isAcquiringData())
+    {
+      ROS_INFO_STREAM("We were acquiring data. Acquisition will stop for a moment");
+      stopAcquireData();
+    }
     
+    switch (req.setting)
+    {
+    case req.SET_GAIN:
+      result = setGain(req.setting);
+      // Add data to the response
+      break;
+    
+    case req.SET_SNR_THRESHOLD:
+      result = setSNRThreshold(req.setting);
+      // Add data to response
+      break;
+
+    case req.SET_SIGNAL_THRESHOLD:
+      result = setSignalThreshold(req.setting);
+      // Add data to response
+      break;
+    
+    default:
+      break;
+    }
+    
+    // If we were acquiring data before, restart
+    if (isAcquiringData())
+    {
+      ROS_INFO_STREAM("Gain has been setted. Acquisition restart");
+      startAcquireNormalMode();
+    }
+
+    return result;
   }
 
   bool ProviderHydrophoneNode::isAcquiringData() 
@@ -182,7 +224,7 @@ namespace provider_hydrophone {
     serialConnection_.transmit(SET_NORMAL_MODE_COMMAND);
 
     // Give time to board to execute command
-    ros::Duration(0.1).sleep();
+    ros::Duration(0.5).sleep();
 
     serialConnection_.flush();
 
@@ -198,7 +240,7 @@ namespace provider_hydrophone {
     serialConnection_.transmit(EXIT_COMMAND);
 
     // Give time to board to execute command
-    ros::Duration(0.1).sleep();
+    ros::Duration(0.5).sleep();
 
     serialConnection_.flush();
     
@@ -207,18 +249,11 @@ namespace provider_hydrophone {
 
   bool ProviderHydrophoneNode::setGain(uint8_t gain) {
 
-    ROS_INFO_STREAM("Setting a new gain on the hydrophone board");
+    ROS_INFO_STREAM("Setting a new gain");
 
-    if (gain > 7 && gain < 0)
+    if (gain > 7 || gain < 0)
     {
       return false;
-    }
-    
-    // If is acquiring data, stop
-    if (isAcquiringData())
-    {
-      ROS_INFO_STREAM("We were acquiring data. Acquisition will stop for a moment");
-      stopAcquireData();
     }
 
     serialConnection_.transmit(SET_GAIN_COMMAND);
@@ -233,12 +268,54 @@ namespace provider_hydrophone {
 
     ROS_INFO_STREAM("Gain has been setted : " << gain);
 
-    // If we were acquiring data before, restart
-    if (isAcquiringData())
+    return true;
+  }
+
+  bool ProviderHydrophoneNode::setSNRThreshold(uint8_t threshold)
+  {
+    ROS_INFO_STREAM("Setting new SNR Threshold");
+    
+    if(threshold < 0 || threshold > sizeof(uint8_t))
     {
-      ROS_INFO_STREAM("Gain has been setted. Acquisition restart");
-      startAcquireNormalMode();
+      return false;
     }
+
+    serialConnection_.transmit(SET_SNR_THRESHOLD);
+
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    serialConnection_.transmit(std::to_string(threshold) + ENTER_COMMAND_CHAR);
+
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    ROS_INFO_STREAM("SNR Threshold has been setted : " << threshold);
+
+    return true;
+  }
+
+  bool ProviderHydrophoneNode::setSignalThreshold(uint32_t threshold)
+  {
+    ROS_INFO_STREAM("Setting new Signal Threshold");
+
+    if(threshold < 0 || threshold > sizeof(threshold))
+    {
+      return false;
+    }
+
+    serialConnection_.transmit(SET_SIGNAL_THRESHOLD);
+
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    serialConnection_.transmit(std::to_string(threshold) + ENTER_COMMAND_CHAR);
+
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    ROS_INFO_STREAM("Signal Threshold has been setted : " << threshold);
+
     return true;
   }
 
