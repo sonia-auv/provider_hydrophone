@@ -1,9 +1,9 @@
 /**
  * \file	provider_hydrophone_node.cc
- * \author	Marc-Antoine Couture <coumarc9@outlook.com>
- * \date	06/25/2017
+ * \author	Francis Alonzo
+ * \date	2021/10/20
  *
- * \copyright Copyright (c) 2017 S.O.N.I.A. All rights reserved.
+ * \copyright Copyright (c) 2021 S.O.N.I.A. All rights reserved.
  *
  * \section LICENSE
  *
@@ -23,8 +23,9 @@
  * along with S.O.N.I.A. software. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <fcntl.h>
 #include "provider_hydrophone_node.h"
+
+#define MAX_BUFFER_SIZE 4096
 
 namespace provider_hydrophone {
 
@@ -45,13 +46,18 @@ namespace provider_hydrophone {
 
     pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
 
+    readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
+    h1ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h1RegisterThread, this));
+
     //setGain(current_gain_);
   }
 
   //------------------------------------------------------------------------------
   //
   ProviderHydrophoneNode::~ProviderHydrophoneNode() {
-      //driver.closeConnection();
+      serialConnection_.~Serial();
+      readerThread.~thread();
+      h1ParseThread.~thread();
   }
 
   //==============================================================================
@@ -62,19 +68,11 @@ namespace provider_hydrophone {
   {
     ros::Rate r(10);  // 10 hz
 
-    //startAcquireData();
+    startAcquireNormalMode();
 
     while (ros::ok()) 
     {
       ros::spinOnce();
-
-      /*if (gain_ != current_gain_) {
-        //current_gain_ = gain_;
-        //setGain(current_gain_);
-      }*/
-
-      //handlePing();
-      ROS_INFO_STREAM("Spin working");
       r.sleep();
     }
   }
@@ -83,54 +81,101 @@ namespace provider_hydrophone {
   {
     ROS_INFO_STREAM("DynamicReconfigure callback. Old gain : " << gain_ << " new gain : " << config.Gain);
     gain_ = config.Gain;
-  }
+  }*/
 
-  void ProviderHydrophoneNode::handlePing() 
+  void ProviderHydrophoneNode::readThread()
   {
-    Ping ping;
+    ros::Rate r(5);
+    char buffer[MAX_BUFFER_SIZE];
+    ROS_INFO_STREAM("Read Thread started");
 
-    getPing(&ping);
-
-    while (!(ping.isEmpty()))
+    while(!ros::isShuttingDown())
     {
-        sendPing(&ping);
+      if(isAcquiringData())
+      {
+        do
+        {
+          serialConnection_.readOnce(buffer, 0);
+        } while (buffer[0] != 'H');
 
-        getPing(&ping);
+        uint16_t i;
+
+        for(i = 1; buffer[i-1] != '\n' && i < MAX_BUFFER_SIZE; ++i)
+        {
+          serialConnection_.readOnce(buffer, i);
+        }
+        
+        if(i >= MAX_BUFFER_SIZE)
+        {
+          continue;
+        }
+
+        if(!strncmp(&buffer[0], H1_REGISTER, 2))
+        {
+          std::unique_lock<std::mutex> mlock(h1_mutex);
+          h1_string = std::string(buffer);
+          h1_cond.notify_one();
+        }
+      }
+      r.sleep();
     }
   }
 
-  void ProviderHydrophoneNode::sendPing(Ping *ping)
+  void ProviderHydrophoneNode::h1RegisterThread()
   {
-      sonia_common::PingMsg pingMsg;
-      double_t heading, elevation, frequency;
+    ros::Rate r(5);
+    Ping ping;
 
-      pingMsg.header.stamp = ros::Time::now();
+    while(!ros::isShuttingDown())
+    {
+      sonia_common::PingMsg ping_msg;
+      std::string x = "";
+      std::string y = "";
+      std::string frequency = "";
+      std::string debug = "";
 
-      ping->getResults(&heading, &elevation, &frequency);
+      std::unique_lock<std::mutex> mlock(h1_mutex);
+      h1_cond.wait(mlock);
 
-      pingPub.publish(pingMsg);
+      try
+      {
+        if(!h1_string.empty())
+        {
+          std::stringstream ss(h1_string);
+
+          ping_msg.header.stamp = ros::Time::now();
+
+          
+
+        }
+      }
+      catch(...)
+      {
+        ROS_WARN_STREAM("Received bad Packet");
+      }
+      r.sleep();
+    }
   }
 
   bool ProviderHydrophoneNode::isAcquiringData() 
   {
-    return acquiringData;
+    return acquiringNormalData_;
   }
 
-  void ProviderHydrophoneNode::startAcquireData() 
+  void ProviderHydrophoneNode::startAcquireNormalMode() 
   {
     ROS_DEBUG("Start acquiring data");
 
-    if (!isAcquiringData()) return;
+    if (isAcquiringData()) return;
 
-    driver.writeData(SET_NORMAL_MODE_COMMAND);
+    serialConnection_.transmit(SET_NORMAL_MODE_COMMAND);
 
     // Give time to board to execute command
-    usleep(WAITING_TIME);
-    /* TO TEST WITHOUT
-    driver.readData(200);
-    driver.readData(200);*/
+    ros::Duration(0.1).sleep();
 
-    /*acquiringData = true;
+    serialConnection_.flush();
+
+    acquiringNormalData_ = true;
   }
 
   void ProviderHydrophoneNode::stopAcquireData() {
@@ -139,11 +184,16 @@ namespace provider_hydrophone {
 
     if (!isAcquiringData()) return;
 
-    driver.writeData(EXIT_COMMAND);
+    serialConnection_.transmit(EXIT_COMMAND);
 
-    acquiringData = false;
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    serialConnection_.flush();
+    
+    acquiringNormalData_ = false;
   }
-
+/*
   void ProviderHydrophoneNode::setGain(uint32_t gain) {
 
     ROS_DEBUG("Setting a new gain on the hydrophone board");
@@ -173,9 +223,6 @@ namespace provider_hydrophone {
 
     // Give time to board to execute command
     usleep(WAITING_TIME);
-
-    /*TO TEST WITHOUT
-    driver.readData(200);*/
 
     /*ROS_INFO_STREAM("Gain has been setted : " << gain);
 

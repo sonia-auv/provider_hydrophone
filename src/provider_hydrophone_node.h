@@ -1,9 +1,9 @@
 /**
  * \file	provider_hydrophone_node.h
- * \author	Marc-Antoine Couture <coumarc9@outlook.com>
- * \date	06/25/2017
+ * \author	Francis Alonzo
+ * \date	2021/10/20
  *
- * \copyright Copyright (c) 2017 S.O.N.I.A. All rights reserved.
+ * \copyright Copyright (c) 2021 S.O.N.I.A. All rights reserved.
  *
  * \section LICENSE
  *
@@ -23,12 +23,14 @@
  * along with S.O.N.I.A. software. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PROVIDER_HYDROPHONE_PROVIDER_HYDROPHONE_NODE_H_
-#define PROVIDER_HYDROPHONE_PROVIDER_HYDROPHONE_NODE_H_
+#ifndef PROVIDER_HYDROPHONE_NODE_H_
+#define PROVIDER_HYDROPHONE_NODE_H_
 
 #include <ros/node_handle.h>
 #include <regex>
 #include <dynamic_reconfigure/server.h>
+#include <thread>
+#include <condition_variable>
 
 #include <sonia_common/PingMsg.h>
 #include "Configuration.h"
@@ -63,22 +65,37 @@ namespace provider_hydrophone {
         ros::Publisher pingPublisher_;
         //dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
 
-        /*void handlePing();
-        void sendPing(Ping *ping);
+        void readThread();
+        void h1RegisterThread();
+
         bool isAcquiringData();
-        void startAcquireData();
+        void startAcquireNormalMode();
         void stopAcquireData();
-        void setGain(uint32_t gain);*/
+        void setGain(uint8_t gain);
 
-        uint16_t gain_ = 0;
-        uint16_t current_gain_ = 0;
-        uint16_t soundSpeed_ = 0;
-        double_t distanceBetweenHydrophone_ = 0.0;
-        bool acquiringData_ = false;
+        uint8_t gain_ = 0;
+        uint8_t current_gain_ = 0;
+        uint16_t snrThreshold_ = 0;
+        uint16_t signalThreshold_ = 0;
+        bool acquiringNormalData_ = false;
 
+        std::thread readerThread;
+        std::thread h1ParseThread;
+
+        std::condition_variable h1_cond;
+        std::string h1_string;
+        std::mutex h1_mutex;
+        
+        std::condition_variable h6_cond;
+        std::string h6_string;
+        std::mutex h6_mutex;
+        
         //--------------------------------------------------------
         //-------------------------CONST--------------------------
         //--------------------------------------------------------
+
+        const char* H1_REGISTER = "H1";
+        const char* H6_REGISTER = "H6";
 
         const std::string ENTER_COMMAND_CHAR = "\n";
         const std::string SET_NORMAL_MODE_COMMAND = "1" + ENTER_COMMAND_CHAR;
@@ -88,9 +105,8 @@ namespace provider_hydrophone {
 
         const std::string EXIT_COMMAND = "q";
 
-        const uint32_t WAITING_TIME = 100000;
     };
 
 }  // namespace provider_hydrophone
 
-#endif  // PROVIDER_HYDROPHONE_PROVIDER_HYDROPHONE_NODE_H_
+#endif  // PROVIDER_HYDROPHONE_NODE_H_
