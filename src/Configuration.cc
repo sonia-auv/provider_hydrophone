@@ -13,7 +13,7 @@ namespace provider_hydrophone
           soundSpeed(1484),
           threshold(4),
           gain(2),
-          ttyPort("/dev/HYDRO")
+          ttyPort("/dev/ttyUSB0")
     {
         Deserialize();
     }

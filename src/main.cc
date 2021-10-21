@@ -24,7 +24,7 @@
  */
 
 #include <ros/ros.h>
-#include "provider_hydrophone/provider_hydrophone_node.h"
+#include "provider_hydrophone_node.h"
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "provider_hydrophone");

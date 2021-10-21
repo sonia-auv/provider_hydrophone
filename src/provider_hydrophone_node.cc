@@ -24,7 +24,7 @@
  */
 
 #include <fcntl.h>
-#include "provider_hydrophone/provider_hydrophone_node.h"
+#include "provider_hydrophone_node.h"
 
 namespace provider_hydrophone {
 
@@ -35,28 +35,22 @@ namespace provider_hydrophone {
 //
   ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
     : nh_(nh),
-      configuration(nh),
-      driver(configuration.getTtyPort().c_str()),
-      gain_(configuration.getGain()),
-      current_gain_(configuration.getGain()),
-      soundSpeed(configuration.getSoundSpeed()),
-      distanceBetweenHydrophone(configuration.getDistanceBetweenHydrophone())
+      configuration_(nh)
   {
-    server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
+    //server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
 
-    HydroConfig config;
-    config.Gain = current_gain_;
-    CallBackDynamicReconfigure(config, 0);
+    //HydroConfig config;
+    //CallBackDynamicReconfigure(config, 0);
 
-    pingPub = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
+    pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
 
-    setGain(current_gain_);
+    //setGain(current_gain_);
   }
 
   //------------------------------------------------------------------------------
   //
   ProviderHydrophoneNode::~ProviderHydrophoneNode() {
-      driver.closeConnection();
+      //driver.closeConnection();
   }
 
   //==============================================================================
@@ -67,24 +61,24 @@ namespace provider_hydrophone {
   {
     ros::Rate r(100);  // 100 hz
 
-    startAcquireData();
+    //startAcquireData();
 
     while (ros::ok()) 
     {
       ros::spinOnce();
 
-      if (gain_ != current_gain_) {
-        current_gain_ = gain_;
-        setGain(current_gain_);
-      }
+      /*if (gain_ != current_gain_) {
+        //current_gain_ = gain_;
+        //setGain(current_gain_);
+      }*/
 
-      handlePing();
+      //handlePing();
 
       r.sleep();
     }
   }
 
-  void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
+  /*void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
   {
     ROS_INFO_STREAM("DynamicReconfigure callback. Old gain : " << gain_ << " new gain : " << config.Gain);
     gain_ = config.Gain;
@@ -135,7 +129,7 @@ namespace provider_hydrophone {
     driver.readData(200);
     driver.readData(200);*/
 
-    acquiringData = true;
+    /*acquiringData = true;
   }
 
   void ProviderHydrophoneNode::stopAcquireData() {
@@ -182,7 +176,7 @@ namespace provider_hydrophone {
     /*TO TEST WITHOUT
     driver.readData(200);*/
 
-    ROS_INFO_STREAM("Gain has been setted : " << gain);
+    /*ROS_INFO_STREAM("Gain has been setted : " << gain);
 
     // If we were acquiring data before, restart
     if (isAcquiringData())
@@ -192,30 +186,6 @@ namespace provider_hydrophone {
     }
 
     ROS_DEBUG("End of setting a gain on the hydrophone board");
-  }
-
-  void ProviderHydrophoneNode::getPing(Ping* ping) 
-  {
-    ROS_DEBUG("Try to get a ping");
-
-    auto line = driver.readLine();
-
-    std::smatch matcher;
-    std::regex expression(REGEX);
-
-    bool searchFound = std::regex_search(line, matcher, expression);
-
-    if (searchFound)
-    {
-      ROS_DEBUG("Ping found with the REGEX");
-
-      ping->FillPing(std::stod(matcher[REGEX_PHASEREF_ID]), std::stod(matcher[REGEX_PHASE1_ID]), std::stod(matcher[REGEX_PHASE2_ID]), 
-                  std::stod(matcher[REGEX_PHASE3_ID]), std::stod(matcher[REGEX_INDEX_ID]));
-    }
-    else
-    {
-      ROS_DEBUG("No ping found with the REGEX");
-    }
-  }
+  }*/
 
 }  // namespace provider_hydrophone

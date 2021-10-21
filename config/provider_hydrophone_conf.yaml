@@ -1,7 +1,6 @@
 #Constants informations
-/provider_hydrophone/hydrophone/distance_between_hydrophone: 0.015 #meters
-/provider_hydrophone/hydrophone/sound_speed: 1484 #meters/second
-/provider_hydrophone/hydrophone/threshold: 4 # threshold
-/provider_hydrophone/hydrophone/gain: 3 # gain
+/provider_hydrophone/hydrophone/snr_threshold : 10
+/provider_hydrophone/hydrophone/signal_threshold: 35000
+/provider_hydrophone/hydrophone/gain: 4
 
-/provider_hydrophone/connection/tty_port: "/dev/HYDRO"
+#/provider_hydrophone/connection/tty_port: "/dev/HYDRO"

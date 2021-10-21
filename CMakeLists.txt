@@ -55,7 +55,7 @@ file(GLOB_RECURSE provider_hydrophone_FILES
         "${provider_hydrophone_SRC_DIR}/*.h")
 
 list(REMOVE_ITEM provider_hydrophone_FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/${provider_hydrophone_SRC_DIR}/${PROJECT_NAME}/main.cc)
+        ${CMAKE_CURRENT_SOURCE_DIR}/${provider_hydrophone_SRC_DIR}/main.cc)
 
 include_directories(
         ${catkin_INCLUDE_DIRS}
@@ -65,7 +65,7 @@ include_directories(
 #==========================================================================
 # C R E A T E   E X E C U T A B L E
 
-add_executable(${PROJECT_NAME}_node ${provider_hydrophone_SRC_DIR}/${PROJECT_NAME}/main.cc ${provider_hydrophone_FILES})
+add_executable(${PROJECT_NAME}_node ${provider_hydrophone_SRC_DIR}/main.cc ${provider_hydrophone_FILES})
 target_link_libraries(${PROJECT_NAME}_node
         ${catkin_LIBRARIES}
         yaml-cpp
