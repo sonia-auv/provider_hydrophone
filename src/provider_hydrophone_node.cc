@@ -146,11 +146,11 @@ namespace provider_hydrophone {
           std::getline(ss, x, ',');
           std::getline(ss, y, '\n');
 
-          uint32_t x_int = fixedToFloat(stoi(x));
-          uint32_t y_int = fixedToFloat(stoi(y));
+          float_t x_t = fixedToFloat(stoi(x));
+          float_t y_t = fixedToFloat(stoi(y));
 
-          ping_msg.heading = ping.calculateHeading(x_int, y_int);
-          ping_msg.elevation = ping.calculateElevation(x_int, y_int, stoi(frequency));
+          ping_msg.heading = ping.calculateHeading(x_t, y_t);
+          ping_msg.elevation = ping.calculateElevation(x_t, y_t, stoi(frequency));
 
           pingPublisher_.publish(ping_msg);
         }
@@ -182,18 +182,21 @@ namespace provider_hydrophone {
     switch (req.setting)
     {
     case req.SET_GAIN:
-      result = setGain(req.setting);
-      // Add data to the response
+      result = setGain(req.data);
+      res.applied_data = req.data;
+      res.applied_setting = req.setting;
       break;
     
     case req.SET_SNR_THRESHOLD:
-      result = setSNRThreshold(req.setting);
-      // Add data to response
+      result = setSNRThreshold(req.data);
+      res.applied_data = req.data;
+      res.applied_setting = req.setting;
       break;
 
     case req.SET_SIGNAL_THRESHOLD:
-      result = setSignalThreshold(req.setting);
-      // Add data to response
+      result = setSignalThreshold(req.data);
+      res.applied_data = req.data;
+      res.applied_setting = req.setting;
       break;
     
     default:
