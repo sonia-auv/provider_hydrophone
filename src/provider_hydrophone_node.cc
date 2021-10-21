@@ -35,7 +35,8 @@ namespace provider_hydrophone {
 //
   ProviderHydrophoneNode::ProviderHydrophoneNode(const ros::NodeHandlePtr &nh)
     : nh_(nh),
-      configuration_(nh)
+      configuration_(nh),
+      serialConnection_(configuration_.getTtyPort())
   {
     //server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
 
@@ -59,7 +60,7 @@ namespace provider_hydrophone {
   //
   void ProviderHydrophoneNode::Spin() 
   {
-    ros::Rate r(100);  // 100 hz
+    ros::Rate r(10);  // 10 hz
 
     //startAcquireData();
 
@@ -73,7 +74,7 @@ namespace provider_hydrophone {
       }*/
 
       //handlePing();
-
+      ROS_INFO_STREAM("Spin working");
       r.sleep();
     }
   }

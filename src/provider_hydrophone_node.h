@@ -33,6 +33,7 @@
 #include <sonia_common/PingMsg.h>
 #include "Configuration.h"
 #include "Ping.h"
+#include "drivers/serial.h"
 
 namespace provider_hydrophone {
 
@@ -58,7 +59,7 @@ namespace provider_hydrophone {
         
         ros::NodeHandlePtr nh_;
         Configuration configuration_;
-       // UsbDriver driver;
+        Serial serialConnection_;
         ros::Publisher pingPublisher_;
         //dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
 

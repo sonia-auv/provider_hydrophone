@@ -8,11 +8,10 @@ namespace provider_hydrophone
 {
 
     Configuration::Configuration(const ros::NodeHandlePtr &nh)
-        : nh(nh),
-          distanceBetweenHydrophone(0.015),
-          soundSpeed(1484),
-          threshold(4),
-          gain(2),
+        : nh_(nh),
+          snrThreshold(10),
+          signalThreshold(35000),
+          gain(4),
           ttyPort("/dev/ttyUSB0")
     {
         Deserialize();
@@ -24,9 +23,8 @@ namespace provider_hydrophone
 
         ROS_DEBUG("Deserialize params");
 
-        FindParameter("/hydrophone/distance_between_hydrophone", distanceBetweenHydrophone);
-        FindParameter("/hydrophone/sound_speed", soundSpeed);
-        FindParameter("/hydrophone/threshold", threshold);
+        FindParameter("/hydrophone/snr_threshold", snrThreshold);
+        FindParameter("/hydrophone/signal_threshold", signalThreshold);
         FindParameter("/hydrophone/gain", gain);
         FindParameter("/connection/tty_port", ttyPort);
 
@@ -35,13 +33,11 @@ namespace provider_hydrophone
 
     template <typename TType>
     void Configuration::FindParameter(const std::string &paramName, TType &attribute) {
-        if (nh->hasParam("/provider_hydrophone" + paramName))
-        {
-            nh->getParam("/provider_hydrophone" + paramName, attribute);
-        }
-        else
-        {
-            ROS_WARN_STREAM("Did not find /provider_hydrophone" + paramName << ". Using default.");
+        if (nh_->hasParam("/provider_underwater_com" + paramName)) {
+            nh_->getParam("/provider_underwater_com" + paramName, attribute);
+        } else {
+            ROS_WARN_STREAM("Did not find /provider_hydrophone" + paramName
+                                    << ". Using default.");
         }
     }
 }
