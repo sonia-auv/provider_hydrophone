@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <package>
   <name>provider_hydrophone</name>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <description>
     The provider_hydrophone is responsible to get data from hydrophone
   </description>
 
-  <author>Marc-Antoine Couture</author>
+  <author>Francis Alonzo</author>
 
-  <maintainer email="coumarc9@outlook.com">Marc-Antoine Couture</maintainer>
   <maintainer email="francisalonzo29@gmail.com">Francis Alonzo</maintainer>
 
   <license>GPLv3</license>

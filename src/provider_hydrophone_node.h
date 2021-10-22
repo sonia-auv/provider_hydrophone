@@ -52,11 +52,7 @@ namespace provider_hydrophone {
 
         ~ProviderHydrophoneNode();
 
-        /// Taking care of the spinning of the ROS thread.
-        /// Each iteration of the loop, this will take the objects in the object
-        /// registery, empty it and publish the objects.
         void Spin();
-        //void CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level);
 
     private:
         
@@ -64,7 +60,6 @@ namespace provider_hydrophone {
         Configuration configuration_;
         Serial serialConnection_;
         ros::Publisher pingPublisher_;
-        //dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
 
         void readThread();
         void h1RegisterThread();

@@ -39,11 +39,6 @@ namespace provider_hydrophone {
       configuration_(nh),
       serialConnection_(configuration_.getTtyPort())
   {
-    //server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
-
-    //HydroConfig config;
-    //CallBackDynamicReconfigure(config, 0);
-
     pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
 
     readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
@@ -76,12 +71,6 @@ namespace provider_hydrophone {
       r.sleep();
     }
   }
-
-  /*void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
-  {
-    ROS_INFO_STREAM("DynamicReconfigure callback. Old gain : " << gain_ << " new gain : " << config.Gain);
-    gain_ = config.Gain;
-  }*/
 
   void ProviderHydrophoneNode::readThread()
   {
