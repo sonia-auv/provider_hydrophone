@@ -37,6 +37,8 @@
 #include "drivers/serial.h"
 
 #define FIXED_POINT_FRACTIONAL_BITS 19
+#define SIGNED_MASK 0x40000000
+#define FIXED_POINT_DATA_MASK 0x3FFFFFFF
 
 namespace provider_hydrophone {
 

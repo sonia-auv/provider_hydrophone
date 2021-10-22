@@ -29,7 +29,7 @@ namespace provider_hydrophone
 
         t2 = t2 - y - x;
         t2 = sqrt(t2);
-
+ 
         return acos(t2/t1);
     }
 

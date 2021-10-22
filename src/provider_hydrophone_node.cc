@@ -324,8 +324,15 @@ namespace provider_hydrophone {
   }
 
   float_t ProviderHydrophoneNode::fixedToFloat(uint32_t data)
-  {
-    return ((float_t) data / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
+  {   
+    if(data & SIGNED_MASK)
+    {
+      return -1.0*((float_t) ((~data) & FIXED_POINT_DATA_MASK) / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
+    }
+    else
+    {
+      return ((float_t) (data & FIXED_POINT_DATA_MASK) / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
+    }
   }
 
 }  // namespace provider_hydrophone
