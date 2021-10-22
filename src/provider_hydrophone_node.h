@@ -97,7 +97,7 @@ namespace provider_hydrophone {
         const char* H1_REGISTER = "H1";
         const char* H6_REGISTER = "H6";
 
-        const std::string ENTER_COMMAND_CHAR = "\n";
+        const std::string ENTER_COMMAND_CHAR = "\r\n";
         const std::string SET_NORMAL_MODE_COMMAND = "1" + ENTER_COMMAND_CHAR;
         const std::string SET_TEST_PING_MODE_COMMAND = "2" + ENTER_COMMAND_CHAR;
         const std::string SET_GAIN_COMMAND = "3" + ENTER_COMMAND_CHAR;

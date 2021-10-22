@@ -39,6 +39,7 @@ namespace provider_hydrophone {
       configuration_(nh),
       serialConnection_(configuration_.getTtyPort())
   {
+    setGain(2);
     pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
 
     readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
@@ -269,7 +270,7 @@ namespace provider_hydrophone {
     // Give time to board to execute command
     ros::Duration(0.1).sleep();
 
-    ROS_INFO_STREAM("Gain has been setted : " << gain);
+    ROS_INFO("Gain has been setted : %d", gain);
 
     return true;
   }
