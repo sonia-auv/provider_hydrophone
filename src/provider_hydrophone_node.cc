@@ -43,8 +43,6 @@ namespace provider_hydrophone {
 
     readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
     h1ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h1RegisterThread, this));
-
-    //setGain(current_gain_);
   }
 
   //------------------------------------------------------------------------------
@@ -204,47 +202,5 @@ namespace provider_hydrophone {
   {
     return ((float_t) data / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
   }
-/*
-  void ProviderHydrophoneNode::setGain(uint32_t gain) {
-
-    ROS_DEBUG("Setting a new gain on the hydrophone board");
-
-    if (gain > MAX_GAIN_VALUE)
-    {
-      gain = MAX_GAIN_VALUE;
-    }
-    
-    // If is acquiring data, stop
-    if (isAcquiringData())
-    {
-      ROS_DEBUG("We were acquiring data. Acquisition will stop for a moment");
-      stopAcquireData();
-    }
-
-    driver.writeData(SET_GAIN_COMMAND);
-
-    // Give time to board to execute command
-    usleep(WAITING_TIME);
-
-    driver.readData(200);
-
-    // Give time to board to execute command
-    usleep(WAITING_TIME);
-    driver.writeData(std::to_string(gain) + ENTER_COMMAND_CHAR);
-
-    // Give time to board to execute command
-    usleep(WAITING_TIME);
-
-    /*ROS_INFO_STREAM("Gain has been setted : " << gain);
-
-    // If we were acquiring data before, restart
-    if (isAcquiringData())
-    {
-      ROS_DEBUG("Gain has been setted. Acquisition restart");
-      startAcquireData();
-    }
-
-    ROS_DEBUG("End of setting a gain on the hydrophone board");
-  }*/
 
 }  // namespace provider_hydrophone

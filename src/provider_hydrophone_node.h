@@ -67,7 +67,6 @@ namespace provider_hydrophone {
         bool isAcquiringData();
         void startAcquireNormalMode();
         void stopAcquireData();
-        //void setGain(uint8_t gain);
         float_t fixedToFloat(uint32_t data);
 
         uint8_t gain_ = 0;
