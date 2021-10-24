@@ -8,10 +8,7 @@
             "name": "ROS: Launch",
             "type": "ros",
             "request": "launch",
-            "preLaunchTask": {
-                "task": "build",
-                "type": "catkin_make"
-            },
+            "preLaunchTask": "build",
             "target": "/home/sonia/ros_sonia_ws/src/provider_hydrophone/launch/provider_hydrophone.launch",
         }
     ]

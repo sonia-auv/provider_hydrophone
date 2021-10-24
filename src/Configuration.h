@@ -18,25 +18,21 @@ namespace provider_hydrophone
         Configuration(const ros::NodeHandlePtr &nh);
         ~Configuration();
 
-        double_t getDistanceBetweenHydrophone() const {return distanceBetweenHydrophone;};
+        uint16_t getsnrThreshold() const {return snrThreshold;};
 
-        uint16_t getSoundSpeed() const {return soundSpeed;};
-
-        uint8_t getThreshold() const {return threshold;};
+        uint16_t getSignalThreshold() const {return signalThreshold;};
 
         uint8_t getGain() const {return gain;};
 
-        std::string getTtyPort() const {return ttyPort;}
+        std::string getTtyPort() const {return ttyPort;};
 
     private:
 
-        ros::NodeHandlePtr nh;
+        ros::NodeHandlePtr nh_;
 
-        double_t distanceBetweenHydrophone;
-        int32_t soundSpeed;
-        int32_t threshold;
+        int32_t snrThreshold;
+        int32_t signalThreshold;
         int32_t gain;
-
         std::string ttyPort;
 
         void Deserialize();
@@ -44,8 +40,6 @@ namespace provider_hydrophone
 
         template <typename TType>
         void FindParameter(const std::string &paramName, TType &attribute);
-
-
         };
 }
 
