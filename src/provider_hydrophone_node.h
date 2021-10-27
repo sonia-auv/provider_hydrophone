@@ -67,6 +67,9 @@ namespace provider_hydrophone {
         void h1RegisterThread();
         bool changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res);
 
+        bool ConfirmChecksum(std::string data);
+        uint8_t CalculateChecksum(std::string data);
+
         bool isAcquiringData();
         void startAcquireNormalMode();
         void stopAcquireData();

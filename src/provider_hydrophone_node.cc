@@ -113,7 +113,6 @@ namespace provider_hydrophone {
 
   void ProviderHydrophoneNode::h1RegisterThread()
   {
-    ros::Rate r(2); // 2 Hz
     Ping ping;
 
     while(!ros::isShuttingDown())
@@ -129,7 +128,7 @@ namespace provider_hydrophone {
 
       try
       {
-        if(!h1_string.empty())
+        if(!h1_string.empty() && ConfirmChecksum(h1_string))
         {
           std::stringstream ss(h1_string);
 
@@ -145,7 +144,7 @@ namespace provider_hydrophone {
           ping_msg.frequency = stoi(frequency);
 
           std::getline(ss, x, ',');
-          std::getline(ss, y, '\n');
+          std::getline(ss, y, '*');
 
           float_t x_t = fixedToFloat(stoi(x));
           float_t y_t = fixedToFloat(stoi(y));
@@ -160,7 +159,6 @@ namespace provider_hydrophone {
       {
         ROS_WARN_STREAM("Received bad Packet");
       }
-      r.sleep();
     }
   }
 
@@ -212,6 +210,35 @@ namespace provider_hydrophone {
     }
 
     return result;
+  }
+
+  bool ProviderHydrophoneNode::ConfirmChecksum(std::string data)
+  {
+    try
+    {
+      std::string checksumData = data.substr(0, data.find("*", 0));
+      uint8_t calculatedChecksum = CalculateChecksum(checksumData);
+      uint8_t orignalChecksum = std::stoi(data.substr(data.find("*", 0)+1, 2), nullptr, 16);
+      return orignalChecksum == calculatedChecksum;
+    }
+    catch(...)
+    {
+      ROS_INFO_STREAM("Hydro : Bad packet checksum");
+      return false;
+    }
+    
+  }
+
+  uint8_t ProviderHydrophoneNode::CalculateChecksum(std::string data)
+  {
+    uint8_t check = 0;
+
+    for(uint8_t i = 0; i < data.size(); ++i)
+    {
+      check += data[i];
+    }
+
+    return check;
   }
 
   bool ProviderHydrophoneNode::isAcquiringData() 
