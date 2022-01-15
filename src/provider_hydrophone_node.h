@@ -71,9 +71,10 @@ namespace provider_hydrophone {
         bool ConfirmChecksum(std::string data);
         uint8_t CalculateChecksum(std::string data);
 
-        bool isAcquiringData();
-        void startAcquireNormalMode();
+        bool isAcquiring();
+        void startAcquireData(const char *hydro_register);
         void stopAcquireData();
+
         bool setGain(uint8_t gain);
         bool setSNRThreshold(uint8_t threshold);
         bool setSignalThreshold(uint32_t threshold);
@@ -87,9 +88,11 @@ namespace provider_hydrophone {
         uint16_t snrThreshold_ = 0;
         uint16_t signalThreshold_ = 0;
         bool acquiringNormalData_ = false;
+        bool acquiringDebugData_ = false;
 
         std::thread readerThread;
         std::thread h1ParseThread;
+        std::thread h6ParseThread;
 
         std::condition_variable h1_cond;
         std::string h1_string;

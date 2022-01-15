@@ -44,6 +44,7 @@ namespace provider_hydrophone {
 
     readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
     h1ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h1RegisterThread, this));
+    h6ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h6RegisterThread, this));
 
     settingsHydro_ = nh_->advertiseService("/provider_hydrophone/change_settings", &ProviderHydrophoneNode::changeSettings, this);
   }
@@ -54,6 +55,7 @@ namespace provider_hydrophone {
       serialConnection_.~Serial();
       readerThread.~thread();
       h1ParseThread.~thread();
+      h6ParseThread.~thread();
   }
 
   //==============================================================================
@@ -64,7 +66,7 @@ namespace provider_hydrophone {
   {
     ros::Rate r(10);  // 10 hz
 
-    startAcquireNormalMode();
+    startAcquireData(H1_REGISTER);
 
     while (ros::ok()) 
     {
@@ -81,7 +83,7 @@ namespace provider_hydrophone {
 
     while(!ros::isShuttingDown())
     {
-      if(isAcquiringData())
+      if(isAcquiring())
       {
         do
         {
@@ -198,7 +200,7 @@ namespace provider_hydrophone {
     }
 
     // If is acquiring data, stop
-    if (isAcquiringData())
+    if (isAcquiring())
     {
       ROS_INFO_STREAM("We were acquiring data. Acquisition will stop for a moment");
       stopAcquireData();
@@ -229,10 +231,10 @@ namespace provider_hydrophone {
     }
     
     // If we were acquiring data before, restart
-    if (isAcquiringData())
+    if (!isAcquiring())
     {
-      ROS_INFO_STREAM("Gain has been setted. Acquisition restart");
-      startAcquireNormalMode();
+      ROS_INFO_STREAM("Settings requested has been setted. Acquisition restart");
+      startAcquireData(H1_REGISTER);
     }
 
     return result;
@@ -267,16 +269,16 @@ namespace provider_hydrophone {
     return check;
   }
 
-  bool ProviderHydrophoneNode::isAcquiringData() 
+  bool ProviderHydrophoneNode::isAcquiring() 
   {
-    return acquiringNormalData_;
+    return acquiringNormalData_ || acquiringDebugData_;
   }
 
-  void ProviderHydrophoneNode::startAcquireNormalMode() 
+  void ProviderHydrophoneNode::startAcquireData(const char *hydro_register)
   {
     ROS_DEBUG("Start acquiring data");
 
-    if (isAcquiringData()) return;
+    if(isAcquiring()) return;
 
     serialConnection_.transmit(SET_NORMAL_MODE_COMMAND);
 
@@ -292,7 +294,7 @@ namespace provider_hydrophone {
 
     ROS_DEBUG("Stop acquiring data");
 
-    if (!isAcquiringData()) return;
+    if (!isAcquiring()) return;
 
     serialConnection_.transmit(EXIT_COMMAND);
 
