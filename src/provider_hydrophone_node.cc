@@ -106,6 +106,12 @@ namespace provider_hydrophone {
           h1_string = std::string(buffer);
           h1_cond.notify_one();
         }
+        if(!strncmp(&buffer[0], H6_REGISTER, 2))
+        {
+          std::unique_lock<std::mutex> mlock(h6_mutex);
+          h6_string = std::string(buffer);
+          h6_cond.notify_one();
+        }
       }
       r.sleep();
     }
@@ -113,8 +119,6 @@ namespace provider_hydrophone {
 
   void ProviderHydrophoneNode::h1RegisterThread()
   {
-    Ping ping;
-
     while(!ros::isShuttingDown())
     {
       sonia_common::PingMsg ping_msg;
@@ -149,10 +153,32 @@ namespace provider_hydrophone {
           float_t x_t = fixedToFloat(stoi(x));
           float_t y_t = fixedToFloat(stoi(y));
 
-          ping_msg.heading = ping.calculateHeading(x_t, y_t);
-          ping_msg.elevation = ping.calculateElevation(x_t, y_t, stoi(frequency));
+          ping_msg.heading = calculateHeading(x_t, y_t);
+          ping_msg.elevation = calculateElevation(x_t, y_t, stoi(frequency));
 
           pingPublisher_.publish(ping_msg);
+        }
+      }
+      catch(...)
+      {
+        ROS_WARN_STREAM("Received bad Packet");
+      }
+    }
+  }
+
+  void ProviderHydrophoneNode::h6RegisterThread()
+  {
+    while(!ros::isShuttingDown())
+    {
+
+      std::unique_lock<std::mutex> mlock(h6_mutex);
+      h6_cond.wait(mlock);
+
+      try
+      {
+        if(!h6_string.empty() && ConfirmChecksum(h6_string))
+        {
+
         }
       }
       catch(...)
@@ -361,5 +387,28 @@ namespace provider_hydrophone {
       return ((float_t) (data & FIXED_POINT_DATA_MASK) / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
     }
   }
+  
+  float_t ProviderHydrophoneNode::calculateElevation(float_t x, float_t y, float_t frequency)
+  {
+      x = pow(x, 2.0);
+      y = pow(y, 2.0);
+
+      float_t frequency_2pi = 0.0, t1 = 0.0, t2 = 0.0;
+
+      frequency_2pi = frequency * 2 * M_PI;
+
+      t1 = frequency_2pi / constant;
+      t2 = pow(t1, 2.0);
+
+      t2 = t2 - y - x;
+      t2 = sqrt(t2);
+
+      return acos(t2/t1);
+  }
+
+  float_t ProviderHydrophoneNode::calculateHeading(float_t x, float_t y)
+  {
+      return atan2(y,x);
+  }  
 
 }  // namespace provider_hydrophone

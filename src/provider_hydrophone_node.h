@@ -29,11 +29,11 @@
 #include <ros/ros.h>
 #include <thread>
 #include <condition_variable>
+#include <math.h>
 
 #include <sonia_common/PingMsg.h>
 #include <sonia_common/SetHydroSettings.h>
 #include "Configuration.h"
-#include "Ping.h"
 #include "drivers/serial.h"
 
 #define FIXED_POINT_FRACTIONAL_BITS 19
@@ -65,6 +65,7 @@ namespace provider_hydrophone {
 
         void readThread();
         void h1RegisterThread();
+        void h6RegisterThread();
         bool changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res);
 
         bool ConfirmChecksum(std::string data);
@@ -77,6 +78,9 @@ namespace provider_hydrophone {
         bool setSNRThreshold(uint8_t threshold);
         bool setSignalThreshold(uint32_t threshold);
         float_t fixedToFloat(uint32_t data);
+
+        float_t calculateElevation(float_t x, float_t y, float_t frequency);
+        float_t calculateHeading(float_t x, float_t y);
 
         uint8_t gain_ = 0;
         uint8_t current_gain_ = 0;
@@ -111,6 +115,10 @@ namespace provider_hydrophone {
         const std::string SET_RAW_DATA_MODE_COMMAND = "6" + ENTER_COMMAND_CHAR;
 
         const std::string EXIT_COMMAND = "q";
+
+        const float_t sample_rate = 256000.0;
+        const float_t fft_length = 256.0;
+        const float_t constant = 1500.0;
     };
 
 }  // namespace provider_hydrophone
