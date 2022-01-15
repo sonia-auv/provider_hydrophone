@@ -66,7 +66,7 @@ namespace provider_hydrophone {
   {
     ros::Rate r(10);  // 10 hz
 
-    startAcquireData(H1_REGISTER);
+    startAcquireData(H6_REGISTER);
 
     while (ros::ok()) 
     {
@@ -88,11 +88,12 @@ namespace provider_hydrophone {
         do
         {
           serialConnection_.readOnce(buffer, 0);
-        } while (buffer[0] != 'H');
+          serialConnection_.readOnce(buffer, 1);
+        } while (buffer[0] != 4 && buffer[1] != 8);
 
         uint16_t i;
 
-        for(i = 1; buffer[i-1] != '\n' && i < MAX_BUFFER_SIZE; ++i)
+        for(i = 2; buffer[i-1] != '\n' && i < MAX_BUFFER_SIZE; ++i)
         {
           serialConnection_.readOnce(buffer, i);
         }
@@ -234,7 +235,7 @@ namespace provider_hydrophone {
     if (!isAcquiring())
     {
       ROS_INFO_STREAM("Settings requested has been setted. Acquisition restart");
-      startAcquireData(H1_REGISTER);
+      startAcquireData(active_register);
     }
 
     return result;
@@ -274,20 +275,34 @@ namespace provider_hydrophone {
     return acquiringNormalData_ || acquiringDebugData_;
   }
 
-  void ProviderHydrophoneNode::startAcquireData(const char *hydro_register)
+  void ProviderHydrophoneNode::startAcquireData(std::string hydro_register)
   {
     ROS_DEBUG("Start acquiring data");
 
     if(isAcquiring()) return;
 
-    serialConnection_.transmit(SET_NORMAL_MODE_COMMAND);
+    if(hydro_register == H1_REGISTER)
+    {
+      serialConnection_.transmit(SET_NORMAL_MODE_COMMAND);
+      acquiringNormalData_ = true;
+    }
+    else if(hydro_register == H6_REGISTER)
+    {
+      serialConnection_.transmit(SET_RAW_DATA_MODE_COMMAND);
+      acquiringDebugData_ = true;
+    }
+    else
+    {
+      ROS_WARN_STREAM("Error with the requested register");
+      return;
+    }
+    
+    active_register = hydro_register;
 
     // Give time to board to execute command
     ros::Duration(0.5).sleep();
 
     serialConnection_.flush();
-
-    acquiringNormalData_ = true;
   }
 
   void ProviderHydrophoneNode::stopAcquireData() {
@@ -298,12 +313,12 @@ namespace provider_hydrophone {
 
     serialConnection_.transmit(EXIT_COMMAND);
 
+    acquiringNormalData_ = false;
+    acquiringDebugData_ = false;
     // Give time to board to execute command
     ros::Duration(0.5).sleep();
 
     serialConnection_.flush();
-    
-    acquiringNormalData_ = false;
   }
 
   bool ProviderHydrophoneNode::setGain(uint8_t gain) {

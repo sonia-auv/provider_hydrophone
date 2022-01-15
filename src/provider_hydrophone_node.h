@@ -30,6 +30,7 @@
 #include <thread>
 #include <condition_variable>
 #include <math.h>
+#include <string>
 
 #include <sonia_common/PingMsg.h>
 #include <sonia_common/SetHydroSettings.h>
@@ -39,6 +40,8 @@
 #define FIXED_POINT_FRACTIONAL_BITS 19
 #define SIGNED_MASK 0x40000000
 #define FIXED_POINT_DATA_MASK 0x3FFFFFFF
+#define H1_REGISTER "H1"
+#define H6_REGISTER "H6"
 
 namespace provider_hydrophone {
 
@@ -72,7 +75,7 @@ namespace provider_hydrophone {
         uint8_t CalculateChecksum(std::string data);
 
         bool isAcquiring();
-        void startAcquireData(const char *hydro_register);
+        void startAcquireData(std::string hydro_register);
         void stopAcquireData();
 
         bool setGain(uint8_t gain);
@@ -89,6 +92,7 @@ namespace provider_hydrophone {
         uint16_t signalThreshold_ = 0;
         bool acquiringNormalData_ = false;
         bool acquiringDebugData_ = false;
+        std::string active_register = "";
 
         std::thread readerThread;
         std::thread h1ParseThread;
@@ -105,9 +109,6 @@ namespace provider_hydrophone {
         //--------------------------------------------------------
         //-------------------------CONST--------------------------
         //--------------------------------------------------------
-
-        const char* H1_REGISTER = "H1";
-        const char* H6_REGISTER = "H6";
 
         const std::string ENTER_COMMAND_CHAR = "\r\n";
         const std::string SET_NORMAL_MODE_COMMAND = "1" + ENTER_COMMAND_CHAR;
