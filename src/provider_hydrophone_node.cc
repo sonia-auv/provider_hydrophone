@@ -114,7 +114,7 @@ namespace provider_hydrophone {
           h6_cond.notify_one();
         }
       }
-      r.sleep();
+      else r.sleep();
     }
   }
 
