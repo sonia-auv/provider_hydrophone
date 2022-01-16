@@ -88,12 +88,10 @@ namespace provider_hydrophone {
         do
         {
           serialConnection_.readOnce(buffer, 0);
-          serialConnection_.readOnce(buffer, 1);
-        } while (buffer[0] != 4 && buffer[1] != 8);
+        } while (buffer[0] != 'H');
 
         uint16_t i;
-
-        for(i = 2; buffer[i-1] != '\n' && i < MAX_BUFFER_SIZE; ++i)
+        for(i =1; buffer[i-1] != '\n' && i < MAX_BUFFER_SIZE; ++i)
         {
           serialConnection_.readOnce(buffer, i);
         }
