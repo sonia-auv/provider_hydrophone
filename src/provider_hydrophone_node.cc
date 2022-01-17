@@ -252,6 +252,35 @@ namespace provider_hydrophone {
     return result;
   }
 
+  bool ProviderHydrophoneNode::changeMode(sonia_common::SetHydroMode::Request &req, sonia_common::SetHydroMode::Response &res)
+  {
+    bool result = false;
+
+    // If is acquiring data, stop
+    if (isAcquiring())
+    {
+      ROS_INFO_STREAM("We were acquiring data. Acquisition will stop for a moment");
+      stopAcquireData();
+    }
+
+    if(req.register_selected == H1_REGISTER)
+    {
+      startAcquireData(H1_REGISTER);
+      result = true;
+    }
+    else if(req.register_selected == H6_REGISTER)
+    {
+      startAcquireData(H6_REGISTER);
+      result = true;
+    }
+    else
+    {
+      result = false;
+    }
+    res.action_accomplished = true;
+    return result;
+  }
+
   bool ProviderHydrophoneNode::ConfirmChecksum(std::string data)
   {
     try
