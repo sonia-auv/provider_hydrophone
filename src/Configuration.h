@@ -11,7 +11,8 @@
 
 namespace provider_hydrophone
 {
-    class Configuration {
+    class Configuration 
+    {
 
     public:
 
@@ -40,7 +41,7 @@ namespace provider_hydrophone
 
         template <typename TType>
         void FindParameter(const std::string &paramName, TType &attribute);
-        };
+    };
 }
 
 

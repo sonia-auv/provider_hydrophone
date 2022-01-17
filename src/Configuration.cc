@@ -33,8 +33,8 @@ namespace provider_hydrophone
 
     template <typename TType>
     void Configuration::FindParameter(const std::string &paramName, TType &attribute) {
-        if (nh_->hasParam("/provider_underwater_com" + paramName)) {
-            nh_->getParam("/provider_underwater_com" + paramName, attribute);
+        if (nh_->hasParam("/provider_hydrophone" + paramName)) {
+            nh_->getParam("/provider_hydrophone" + paramName, attribute);
         } else {
             ROS_WARN_STREAM("Did not find /provider_hydrophone" + paramName
                                     << ". Using default.");

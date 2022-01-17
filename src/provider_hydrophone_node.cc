@@ -41,6 +41,7 @@ namespace provider_hydrophone {
   {
     setGain(2);
     pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
+    debugPublisher_ = nh->advertise<std_msgs::UInt32MultiArray>("/provider_hydrophone/debug_ping", 100);
 
     readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
     h1ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h1RegisterThread, this));
@@ -100,6 +101,8 @@ namespace provider_hydrophone {
         {
           continue;
         }
+
+        buffer[i] = '\0';
 
         if(!strncmp(&buffer[0], H1_REGISTER, 2))
         {
@@ -171,6 +174,8 @@ namespace provider_hydrophone {
   {
     while(!ros::isShuttingDown())
     {
+      std_msgs::UInt32MultiArray msg;
+      std::string tmp;
 
       std::unique_lock<std::mutex> mlock(h6_mutex);
       h6_cond.wait(mlock);
@@ -179,7 +184,17 @@ namespace provider_hydrophone {
       {
         if(!h6_string.empty() && ConfirmChecksum(h6_string))
         {
+          std::stringstream ss(h6_string);
+          std::getline(ss, tmp, ',');
+          
+          msg.data.clear();
 
+          for(uint8_t i = 0; i < 4; ++i)
+          {
+            std::getline(ss, tmp, ',');
+            msg.data.push_back(std::stoi(tmp));
+          }
+          debugPublisher_.publish(msg);
         }
       }
       catch(...)
@@ -197,7 +212,6 @@ namespace provider_hydrophone {
     {
       return false;
     }
-
     // If is acquiring data, stop
     if (isAcquiring())
     {
@@ -235,7 +249,6 @@ namespace provider_hydrophone {
       ROS_INFO_STREAM("Settings requested has been setted. Acquisition restart");
       startAcquireData(active_register);
     }
-
     return result;
   }
 
@@ -243,7 +256,7 @@ namespace provider_hydrophone {
   {
     try
     {
-      std::string checksumData = data.substr(0, data.find("*", 0));
+      std::string checksumData = data.substr(0, data.find("*", 0) + 1); // Include de * of the checksum
       uint8_t calculatedChecksum = CalculateChecksum(checksumData);
       uint8_t orignalChecksum = std::stoi(data.substr(data.find("*", 0)+1, 2), nullptr, 16);
       return orignalChecksum == calculatedChecksum;
@@ -253,7 +266,6 @@ namespace provider_hydrophone {
       ROS_INFO_STREAM("Hydro : Bad packet checksum");
       return false;
     }
-    
   }
 
   uint8_t ProviderHydrophoneNode::CalculateChecksum(std::string data)
@@ -262,9 +274,8 @@ namespace provider_hydrophone {
 
     for(uint8_t i = 0; i < data.size(); ++i)
     {
-      check += data[i];
+      check ^= data[i];
     }
-
     return check;
   }
 

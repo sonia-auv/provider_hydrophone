@@ -4,5 +4,5 @@
 	    type="provider_hydrophone_node"
 	    output="screen" />
 	<rosparam command="load"
-        file="$(find provider_hydrophone)/config/provider_hydrophone_conf.yaml"/>
+        file="$(find provider_hydrophone)/config/spartan7_conf.yaml"/>
 </launch>
