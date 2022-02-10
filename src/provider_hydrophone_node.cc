@@ -39,10 +39,15 @@ namespace provider_hydrophone {
       configuration_(nh),
       serialConnection_(configuration_.getTtyPort())
   {
+    setGain(2);
     pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
+    debugPublisher_ = nh->advertise<std_msgs::UInt32MultiArray>("/provider_hydrophone/debug_ping", 100);
 
     readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
     h1ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h1RegisterThread, this));
+    h6ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h6RegisterThread, this));
+
+    settingsHydro_ = nh_->advertiseService("/provider_hydrophone/change_settings", &ProviderHydrophoneNode::changeSettings, this);
   }
 
   //------------------------------------------------------------------------------
@@ -51,6 +56,7 @@ namespace provider_hydrophone {
       serialConnection_.~Serial();
       readerThread.~thread();
       h1ParseThread.~thread();
+      h6ParseThread.~thread();
   }
 
   //==============================================================================
@@ -61,7 +67,7 @@ namespace provider_hydrophone {
   {
     ros::Rate r(10);  // 10 hz
 
-    startAcquireNormalMode();
+    startAcquireData(H6_REGISTER);
 
     while (ros::ok()) 
     {
@@ -78,7 +84,7 @@ namespace provider_hydrophone {
 
     while(!ros::isShuttingDown())
     {
-      if(isAcquiringData())
+      if(isAcquiring())
       {
         do
         {
@@ -86,8 +92,7 @@ namespace provider_hydrophone {
         } while (buffer[0] != 'H');
 
         uint16_t i;
-
-        for(i = 1; buffer[i-1] != '\n' && i < MAX_BUFFER_SIZE; ++i)
+        for(i =1; buffer[i-1] != '\n' && i < MAX_BUFFER_SIZE; ++i)
         {
           serialConnection_.readOnce(buffer, i);
         }
@@ -97,22 +102,27 @@ namespace provider_hydrophone {
           continue;
         }
 
+        buffer[i] = '\0';
+
         if(!strncmp(&buffer[0], H1_REGISTER, 2))
         {
           std::unique_lock<std::mutex> mlock(h1_mutex);
           h1_string = std::string(buffer);
           h1_cond.notify_one();
         }
+        if(!strncmp(&buffer[0], H6_REGISTER, 2))
+        {
+          std::unique_lock<std::mutex> mlock(h6_mutex);
+          h6_string = std::string(buffer);
+          h6_cond.notify_one();
+        }
       }
-      r.sleep();
+      else r.sleep();
     }
   }
 
   void ProviderHydrophoneNode::h1RegisterThread()
   {
-    ros::Rate r(5);
-    Ping ping;
-
     while(!ros::isShuttingDown())
     {
       sonia_common::PingMsg ping_msg;
@@ -126,7 +136,7 @@ namespace provider_hydrophone {
 
       try
       {
-        if(!h1_string.empty())
+        if(!h1_string.empty() && ConfirmChecksum(h1_string))
         {
           std::stringstream ss(h1_string);
 
@@ -142,13 +152,13 @@ namespace provider_hydrophone {
           ping_msg.frequency = stoi(frequency);
 
           std::getline(ss, x, ',');
-          std::getline(ss, y, '\n');
+          std::getline(ss, y, '*');
 
-          uint32_t x_int = fixedToFloat(stoi(x));
-          uint32_t y_int = fixedToFloat(stoi(y));
+          float_t x_t = fixedToFloat(stoi(x));
+          float_t y_t = fixedToFloat(stoi(y));
 
-          ping_msg.heading = ping.calculateHeading(x_int, y_int);
-          ping_msg.elevation = ping.calculateElevation(x_int, y_int, ping_msg.frequency);
+          ping_msg.heading = calculateHeading(x_t, y_t);
+          ping_msg.elevation = calculateElevation(x_t, y_t, stoi(frequency));
 
           pingPublisher_.publish(ping_msg);
         }
@@ -157,50 +167,303 @@ namespace provider_hydrophone {
       {
         ROS_WARN_STREAM("Received bad Packet");
       }
-      r.sleep();
     }
   }
 
-  bool ProviderHydrophoneNode::isAcquiringData() 
+  void ProviderHydrophoneNode::h6RegisterThread()
   {
-    return acquiringNormalData_;
+    while(!ros::isShuttingDown())
+    {
+      std_msgs::UInt32MultiArray msg;
+      std::string tmp;
+
+      std::unique_lock<std::mutex> mlock(h6_mutex);
+      h6_cond.wait(mlock);
+
+      try
+      {
+        if(!h6_string.empty() && ConfirmChecksum(h6_string))
+        {
+          std::stringstream ss(h6_string);
+          std::getline(ss, tmp, ',');
+          
+          msg.data.clear();
+
+          for(uint8_t i = 0; i < 4; ++i)
+          {
+            std::getline(ss, tmp, ',');
+            msg.data.push_back(std::stoi(tmp));
+          }
+          debugPublisher_.publish(msg);
+        }
+      }
+      catch(...)
+      {
+        ROS_WARN_STREAM("Received bad Packet");
+      }
+    }
   }
 
-  void ProviderHydrophoneNode::startAcquireNormalMode() 
+  bool ProviderHydrophoneNode::changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res)
+  {
+    bool result = false;
+
+    if(req.setting < req.SET_GAIN || req.setting > req.SET_SIGNAL_THRESHOLD)
+    {
+      return false;
+    }
+    // If is acquiring data, stop
+    if (isAcquiring())
+    {
+      ROS_INFO_STREAM("We were acquiring data. Acquisition will stop for a moment");
+      stopAcquireData();
+    }
+    
+    switch (req.setting)
+    {
+    case req.SET_GAIN:
+      result = setGain(req.data);
+      res.applied_data = req.data;
+      res.applied_setting = req.setting;
+      break;
+    
+    case req.SET_SNR_THRESHOLD:
+      result = setSNRThreshold(req.data);
+      res.applied_data = req.data;
+      res.applied_setting = req.setting;
+      break;
+
+    case req.SET_SIGNAL_THRESHOLD:
+      result = setSignalThreshold(req.data);
+      res.applied_data = req.data;
+      res.applied_setting = req.setting;
+      break;
+    
+    default:
+      break;
+    }
+    
+    // If we were acquiring data before, restart
+    if (!isAcquiring())
+    {
+      ROS_INFO_STREAM("Settings requested has been setted. Acquisition restart");
+      startAcquireData(active_register);
+    }
+    return result;
+  }
+
+  bool ProviderHydrophoneNode::changeMode(sonia_common::SetHydroMode::Request &req, sonia_common::SetHydroMode::Response &res)
+  {
+    bool result = false;
+
+    // If is acquiring data, stop
+    if (isAcquiring())
+    {
+      ROS_INFO_STREAM("We were acquiring data. Acquisition will stop for a moment");
+      stopAcquireData();
+    }
+
+    if(req.register_selected == H1_REGISTER)
+    {
+      startAcquireData(H1_REGISTER);
+      result = true;
+    }
+    else if(req.register_selected == H6_REGISTER)
+    {
+      startAcquireData(H6_REGISTER);
+      result = true;
+    }
+    else
+    {
+      result = false;
+    }
+    res.action_accomplished = true;
+    return result;
+  }
+
+  bool ProviderHydrophoneNode::ConfirmChecksum(std::string data)
+  {
+    try
+    {
+      std::string checksumData = data.substr(0, data.find("*", 0) + 1); // Include de * of the checksum
+      uint8_t calculatedChecksum = CalculateChecksum(checksumData);
+      uint8_t orignalChecksum = std::stoi(data.substr(data.find("*", 0)+1, 2), nullptr, 16);
+      return orignalChecksum == calculatedChecksum;
+    }
+    catch(...)
+    {
+      ROS_INFO_STREAM("Hydro : Bad packet checksum");
+      return false;
+    }
+  }
+
+  uint8_t ProviderHydrophoneNode::CalculateChecksum(std::string data)
+  {
+    uint8_t check = 0;
+
+    for(uint8_t i = 0; i < data.size(); ++i)
+    {
+      check ^= data[i];
+    }
+    return check;
+  }
+
+  bool ProviderHydrophoneNode::isAcquiring() 
+  {
+    return acquiringNormalData_ || acquiringDebugData_;
+  }
+
+  void ProviderHydrophoneNode::startAcquireData(std::string hydro_register)
   {
     ROS_DEBUG("Start acquiring data");
 
-    if (isAcquiringData()) return;
+    if(isAcquiring()) return;
 
-    serialConnection_.transmit(SET_NORMAL_MODE_COMMAND);
+    if(hydro_register == H1_REGISTER)
+    {
+      serialConnection_.transmit(SET_NORMAL_MODE_COMMAND);
+      acquiringNormalData_ = true;
+    }
+    else if(hydro_register == H6_REGISTER)
+    {
+      serialConnection_.transmit(SET_RAW_DATA_MODE_COMMAND);
+      acquiringDebugData_ = true;
+    }
+    else
+    {
+      ROS_WARN_STREAM("Error with the requested register");
+      return;
+    }
+    
+    active_register = hydro_register;
 
     // Give time to board to execute command
-    ros::Duration(0.1).sleep();
+    ros::Duration(0.5).sleep();
 
     serialConnection_.flush();
-
-    acquiringNormalData_ = true;
   }
 
   void ProviderHydrophoneNode::stopAcquireData() {
 
     ROS_DEBUG("Stop acquiring data");
 
-    if (!isAcquiringData()) return;
+    if (!isAcquiring()) return;
 
     serialConnection_.transmit(EXIT_COMMAND);
+
+    acquiringNormalData_ = false;
+    acquiringDebugData_ = false;
+    // Give time to board to execute command
+    ros::Duration(0.5).sleep();
+
+    serialConnection_.flush();
+  }
+  
+  bool ProviderHydrophoneNode::setGain(uint8_t gain) {
+
+    ROS_INFO_STREAM("Setting a new gain");
+
+    if (gain > 7 || gain < 0)
+    {
+      return false;
+    }
+
+    serialConnection_.transmit(SET_GAIN_COMMAND);
 
     // Give time to board to execute command
     ros::Duration(0.1).sleep();
 
-    serialConnection_.flush();
+    serialConnection_.transmit(std::to_string(gain) + ENTER_COMMAND_CHAR);
+
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    ROS_INFO("Gain has been setted : %d", gain);
+
+    return true;
+  }
+
+  bool ProviderHydrophoneNode::setSNRThreshold(uint8_t threshold)
+  {
+    ROS_INFO_STREAM("Setting new SNR Threshold");
     
-    acquiringNormalData_ = false;
+    if(threshold < 0 || threshold > sizeof(uint8_t))
+    {
+      return false;
+    }
+
+    serialConnection_.transmit(SET_SNR_THRESHOLD);
+
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    serialConnection_.transmit(std::to_string(threshold) + ENTER_COMMAND_CHAR);
+
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    ROS_INFO_STREAM("SNR Threshold has been setted : " << threshold);
+
+    return true;
+  }
+
+  bool ProviderHydrophoneNode::setSignalThreshold(uint32_t threshold)
+  {
+    ROS_INFO_STREAM("Setting new Signal Threshold");
+
+    if(threshold < 0 || threshold > sizeof(threshold))
+    {
+      return false;
+    }
+
+    serialConnection_.transmit(SET_SIGNAL_THRESHOLD);
+
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    serialConnection_.transmit(std::to_string(threshold) + ENTER_COMMAND_CHAR);
+
+    // Give time to board to execute command
+    ros::Duration(0.1).sleep();
+
+    ROS_INFO_STREAM("Signal Threshold has been setted : " << threshold);
+
+    return true;
   }
 
   float_t ProviderHydrophoneNode::fixedToFloat(uint32_t data)
-  {
-    return ((float_t) data / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
+  {   
+    if(data & SIGNED_MASK)
+    {
+      return -1.0*((float_t) ((~data) & FIXED_POINT_DATA_MASK) / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
+    }
+    else
+    {
+      return ((float_t) (data & FIXED_POINT_DATA_MASK) / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
+    }
   }
+  
+  float_t ProviderHydrophoneNode::calculateElevation(float_t x, float_t y, float_t frequency)
+  {
+      x = pow(x, 2.0);
+      y = pow(y, 2.0);
+
+      float_t frequency_2pi = 0.0, t1 = 0.0, t2 = 0.0;
+
+      frequency_2pi = frequency * 2 * M_PI;
+
+      t1 = frequency_2pi / constant;
+      t2 = pow(t1, 2.0);
+
+      t2 = t2 - y - x;
+      t2 = sqrt(t2);
+
+      return acos(t2/t1);
+  }
+
+  float_t ProviderHydrophoneNode::calculateHeading(float_t x, float_t y)
+  {
+      return atan2(y,x);
+  } 
 
 }  // namespace provider_hydrophone
