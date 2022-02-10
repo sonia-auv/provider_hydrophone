@@ -35,6 +35,7 @@
 #include <std_msgs/UInt32MultiArray.h>
 #include <sonia_common/PingMsg.h>
 #include <sonia_common/SetHydroSettings.h>
+#include <sonia_common/SetHydroMode.h>
 #include "Configuration.h"
 #include "drivers/serial.h"
 
@@ -67,13 +68,13 @@ namespace provider_hydrophone {
         ros::Publisher pingPublisher_;
         ros::Publisher debugPublisher_;
         ros::ServiceServer settingsHydro_;
-        //ros::ServiceServer modeHydro_;
+        ros::ServiceServer modeHydro_;
 
         void readThread();
         void h1RegisterThread();
         void h6RegisterThread();
         bool changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res);
-        //bool changeMode();
+        bool changeMode(sonia_common::SetHydroMode::Request &req, sonia_common::SetHydroMode::Response &res);
 
         bool ConfirmChecksum(std::string data);
         uint8_t CalculateChecksum(std::string data);
