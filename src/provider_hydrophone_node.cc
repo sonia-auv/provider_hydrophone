@@ -464,6 +464,6 @@ namespace provider_hydrophone {
   float_t ProviderHydrophoneNode::calculateHeading(float_t x, float_t y)
   {
       return atan2(y,x);
-  } 
+  }
 
 }  // namespace provider_hydrophone
