@@ -1,0 +1,5 @@
+Run le container
+docker run --name provider_hydro -it --privileged -e AUV=LOCAL -e ROS_MASTER_URI=http://192.168.0.104:11311 -e ROS_IP=192.168.0.117 --network=host --mount type=bind,src=/dev,dst=/dev  --mount type=bind,src=/home/sonia/Documents/bags,dst=/home/sonia/ros_sonia_ws/src/bags ghcr.io/sonia-auv/provider_hydrophone/provider_hydrophone:arm64-perception-feature-noetic bash
+
+Test le board
+sudo picocom -b 230400 -c /dev/ttyUSB0
