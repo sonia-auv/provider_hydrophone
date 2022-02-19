@@ -39,7 +39,8 @@ namespace provider_hydrophone {
       configuration_(nh),
       serialConnection_(configuration_.getTtyPort())
   {
-    setGain(2);
+    stopAcquireData();
+    setGain(configuration_.getGain());
     pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
     debugPublisher_ = nh->advertise<std_msgs::UInt32MultiArray>("/provider_hydrophone/debug_ping", 100);
 
@@ -267,11 +268,13 @@ namespace provider_hydrophone {
     if(req.register_selected == H1_REGISTER)
     {
       startAcquireData(H1_REGISTER);
+      ROS_INFO_STREAM("Acquisition of H1 Register");
       result = true;
     }
     else if(req.register_selected == H6_REGISTER)
     {
       startAcquireData(H6_REGISTER);
+      ROS_INFO_STREAM("Acquisition of H6 Register");
       result = true;
     }
     else
