@@ -48,6 +48,7 @@ namespace provider_hydrophone {
     h6ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h6RegisterThread, this));
 
     settingsHydro_ = nh_->advertiseService("/provider_hydrophone/change_settings", &ProviderHydrophoneNode::changeSettings, this);
+    modeHydro_ = nh_->advertiseService("/provider_hydrophone/change_mode", &ProviderHydrophoneNode::changeMode, this);
   }
 
   //------------------------------------------------------------------------------
