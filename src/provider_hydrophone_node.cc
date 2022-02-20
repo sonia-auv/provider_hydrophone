@@ -138,7 +138,7 @@ namespace provider_hydrophone {
 
       try
       {
-        if(!h1_string.empty() && ConfirmChecksum(h1_string))
+        if(!h1_string.empty())
         {
           std::stringstream ss(h1_string);
 
