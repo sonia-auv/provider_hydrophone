@@ -138,7 +138,7 @@ namespace provider_hydrophone {
 
       try
       {
-        if(!h1_string.empty())
+        if(!h1_string.empty() and ConfirmChecksum(h1_string))
         {
           std::stringstream ss(h1_string);
 
@@ -289,7 +289,7 @@ namespace provider_hydrophone {
   {
     try
     {
-      std::string checksumData = data.substr(0, data.find("*", 0) + 1); // Include de * of the checksum
+      std::string checksumData = data.substr(0, data.find("*", 0)); // Include de * of the checksum + 1
       uint8_t calculatedChecksum = CalculateChecksum(checksumData);
       uint8_t orignalChecksum = std::stoi(data.substr(data.find("*", 0)+1, 2), nullptr, 16);
       return orignalChecksum == calculatedChecksum;
@@ -437,37 +437,37 @@ namespace provider_hydrophone {
 
   float_t ProviderHydrophoneNode::fixedToFloat(uint32_t data)
   {   
+    float_t value = 0.0, sign = 1.0;
+    
     if(data & SIGNED_MASK)
     {
-      return -1.0*((float_t) ((~data) & FIXED_POINT_DATA_MASK) / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
+      sign = -1.0;
+      value = (float_t)((~data) & FIXED_POINT_DATA_MASK);
     }
     else
     {
-      return ((float_t) (data & FIXED_POINT_DATA_MASK) / (float_t)(1 << FIXED_POINT_FRACTIONAL_BITS));
+      value = (float_t)(data & FIXED_POINT_DATA_MASK);
     }
+    value /= pow(2.0, FIXED_POINT_FRACTIONAL_BITS); 
+    return value * sign;
   }
   
   float_t ProviderHydrophoneNode::calculateElevation(float_t x, float_t y, float_t frequency)
   {
-      x = pow(x, 2.0);
-      y = pow(y, 2.0);
+    float_t t1 = 0.0, t2 = 0.0;
 
-      float_t frequency_2pi = 0.0, t1 = 0.0, t2 = 0.0;
+    t1 = (frequency * 2 * M_PI) / constant;
+    t2 = t1 * t1;
 
-      frequency_2pi = frequency * 2 * M_PI;
+    t2 -= (y * y) - (x * x);
+    t2 = sqrt(t2);
 
-      t1 = frequency_2pi / constant;
-      t2 = pow(t1, 2.0);
-
-      t2 = t2 - y - x;
-      t2 = sqrt(t2);
-
-      return acos(t2/t1);
+    return acos(t2/t1);
   }
 
   float_t ProviderHydrophoneNode::calculateHeading(float_t x, float_t y)
   {
-      return atan2(y,x);
+    return atan2(y,x);
   }  
 
 }  // namespace provider_hydrophone
