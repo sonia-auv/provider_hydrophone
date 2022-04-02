@@ -69,7 +69,7 @@ namespace provider_hydrophone {
   {
     ros::Rate r(10);  // 10 hz
 
-    startAcquireData(H1_REGISTER);
+    startAcquireData(H6_REGISTER);
 
     while (ros::ok()) 
     {
