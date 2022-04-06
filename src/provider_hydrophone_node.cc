@@ -362,7 +362,7 @@ namespace provider_hydrophone {
 
     serialConnection_.flush();
   }
-
+  
   bool ProviderHydrophoneNode::setGain(uint8_t gain) {
 
     ROS_INFO_STREAM("Setting a new gain");
@@ -469,5 +469,4 @@ namespace provider_hydrophone {
   {
     return atan2(y,x);
   }  
-
 }  // namespace provider_hydrophone
