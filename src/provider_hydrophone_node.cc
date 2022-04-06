@@ -312,20 +312,34 @@ namespace provider_hydrophone {
     return check;
   }
 
+  void sendCmd(std::string cmd, u8 *argv)
+  {
+    std::string send_string = cmd;
+    size_t len = sizeof(argv) / sizeof(argv[0]);
+
+    for(uint8_t i = 0; i < len; ++i)
+    {
+      send_string += " " + std::to_string(argv[i]);
+    }
+
+    send_string += ENTER_COMMAND;
+    serialConnection_.transmit(send_string);
+  }
+
   bool ProviderHydrophoneNode::isAcquiring() 
   {
     return acquiringNormalData_ || acquiringDebugData_;
   }
 
-  void ProviderHydrophoneNode::startAcquireData(std::string hydro_register)
+  void ProviderHydrophoneNode::startAcquireData(operation_mode mode)
   {
     ROS_DEBUG("Start acquiring data");
 
     if(isAcquiring()) return;
 
-    if(hydro_register == H1_REGISTER)
+    if(mode == normalop)
     {
-      serialConnection_.transmit(SET_NORMAL_MODE_COMMAND);
+      serialConnection_.transmit();
       acquiringNormalData_ = true;
     }
     else if(hydro_register == H6_REGISTER)
@@ -355,8 +369,7 @@ namespace provider_hydrophone {
 
     serialConnection_.transmit(EXIT_COMMAND);
 
-    acquiringNormalData_ = false;
-    acquiringDebugData_ = false;
+    operation_mode_ = idle;
     // Give time to board to execute command
     ros::Duration(0.5).sleep();
 
