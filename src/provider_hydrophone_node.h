@@ -69,23 +69,24 @@ namespace provider_hydrophone {
         Serial serialConnection_;
         ros::Publisher pingPublisher_;
         ros::Publisher debugPublisher_;
-        ros::ServiceServer settingsHydro_;
-        ros::ServiceServer modeHydro_;
+        // ros::ServiceServer settingsHydro_;
+        // ros::ServiceServer modeHydro_;
 
         void readThread();
         void h1RegisterThread();
         void h6RegisterThread();
-        bool changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res);
-        bool changeMode(sonia_common::SetHydroMode::Request &req, sonia_common::SetHydroMode::Response &res);
+        // bool changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res);
+        // bool changeMode(sonia_common::SetHydroMode::Request &req, sonia_common::SetHydroMode::Response &res);
 
         bool ConfirmChecksum(std::string data);
         uint8_t CalculateChecksum(std::string data);
 
-        void sendCmd(std::string cmd, u8 *argv);
+        void sendCmd(std::string cmd, uint16_t *argv);
 
         bool isAcquiring();
-        void startAcquireData(std::string hydro_register);
+        void startAcquireData(operation_mode mode);
         void stopAcquireData();
+        bool changeMode(operation_mode mode);
 
         bool setGain(uint8_t gain);
         bool setSNRThreshold(uint8_t threshold);
@@ -126,12 +127,13 @@ namespace provider_hydrophone {
         //--------------------------------------------------------
 
         const std::string ENTER_COMMAND = "\n";
-        // const std::string SET_NORMAL_MODE_COMMAND = "1" + ENTER_COMMAND_CHAR;
-        // const std::string SET_TEST_PING_MODE_COMMAND = "2" + ENTER_COMMAND_CHAR;
-        // const std::string SET_GAIN_COMMAND = "3" + ENTER_COMMAND_CHAR;
-        // const std::string SET_SNR_THRESHOLD = "4" + ENTER_COMMAND_CHAR;
-        // const std::string SET_SIGNAL_THRESHOLD = "5" + ENTER_COMMAND_CHAR;
-        // const std::string SET_RAW_DATA_MODE_COMMAND = "6" + ENTER_COMMAND_CHAR;
+        const std::string OPERATION_CMD = "op";
+        const std::string SET_NORMAL_MODE_COMMAND = "1" + ENTER_COMMAND;
+        const std::string SET_TEST_PING_MODE_COMMAND = "2" + ENTER_COMMAND;
+        const std::string SET_GAIN_COMMAND = "3" + ENTER_COMMAND;
+        const std::string SET_SNR_THRESHOLD = "4" + ENTER_COMMAND;
+        const std::string SET_SIGNAL_THRESHOLD = "5" + ENTER_COMMAND;
+        const std::string SET_RAW_DATA_MODE_COMMAND = "6" + ENTER_COMMAND;
 
         const std::string EXIT_COMMAND = "q";
 
