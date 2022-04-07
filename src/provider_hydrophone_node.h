@@ -35,6 +35,7 @@
 
 #include <std_msgs/UInt32MultiArray.h>
 #include <sonia_common/PingMsg.h>
+#include <sonia_common/HydroSettings.h>
 #include "Configuration.h"
 #include "drivers/serial.h"
 
@@ -78,7 +79,7 @@ namespace provider_hydrophone {
         bool stoph1RegisterThread = false;
         bool stoph6RegisterThread = false;
 
-        void changeSettings();
+        void changeSettings(const sonia_common::HydroSettings::ConstPtr& msg);
 
         bool ConfirmChecksum(std::string data);
         uint8_t CalculateChecksum(std::string data);
@@ -92,7 +93,7 @@ namespace provider_hydrophone {
 
         bool setGain(uint8_t gain);
 
-        void createDOACommand(std::vector<uint16_t> *argv);
+        void createDOACommand();
         bool setSNRThreshold(uint8_t threshold);
         bool setSignalLowThreshold(uint16_t threshold);
         bool setSignalHighThreshold(uint16_t threshold);

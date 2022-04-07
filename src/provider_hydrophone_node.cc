@@ -42,9 +42,13 @@ namespace provider_hydrophone {
   {
     stopAcquireData();
     setGain(configuration_.getGain());
-    pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
-    debugPublisher_ = nh->advertise<std_msgs::UInt32MultiArray>("/provider_hydrophone/debug_ping", 100);
 
+    // Subscribers
+    pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
+    debugPublisher_ = nh_->advertise<std_msgs::UInt32MultiArray>("/provider_hydrophone/debug_ping", 100);
+    settingsSubcriber_ = nh_->subscribe("/provider_hydrophone/change_settings", 10, &ProviderHydrophoneNode::changeSettings, this);
+
+    // Threads
     readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
     h1ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h1RegisterThread, this));
     h6ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h6RegisterThread, this));
@@ -204,95 +208,41 @@ namespace provider_hydrophone {
     }
   }
 
-  void ProviderHydrophoneNode::changeSettings()
+  void ProviderHydrophoneNode::changeSettings(const sonia_common::HydroSettings::ConstPtr& msg)
   {
+    bool result = false;
+    
+    if(msg->cmd == sonia_common::HydroSettings::operation_mode)
+    {
+      result = changeMode((operation_mode) msg->argv[0]);
+    }
+    else if(msg->cmd == sonia_common::HydroSettings::pga_gain)
+    {
+      result = setGain((uint8_t) msg->argv[0]);
+    }
+    else if(msg->cmd == sonia_common::HydroSettings::doa_settings)
+    {
+      result = setSNRThreshold(msg->argv[0]);
+      result = setSignalLowThreshold(msg->argv[1]);
+      result = setSignalHighThreshold(msg->argv[2]);
+      createDOACommand();
+    }
 
+    if(result)
+    {
+      ROS_DEBUG_STREAM("Setting has been changed");
+    }
+    else
+    {
+      ROS_ERROR_STREAM("Error with the settings change");
+    }
   }
-
-  // bool ProviderHydrophoneNode::changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res)
-  // {
-  //   bool result = false;
-
-  //   if(req.setting < req.SET_GAIN || req.setting > req.SET_SIGNAL_THRESHOLD)
-  //   {
-  //     return false;
-  //   }
-  //   // If is acquiring data, stop
-  //   if (isAcquiring())
-  //   {
-  //     ROS_INFO_STREAM("We were acquiring data. Acquisition will stop for a moment");
-  //     stopAcquireData();
-  //   }
-    
-  //   switch (req.setting)
-  //   {
-  //   case req.SET_GAIN:
-  //     result = setGain(req.data);
-  //     res.applied_data = req.data;
-  //     res.applied_setting = req.setting;
-  //     break;
-    
-  //   case req.SET_SNR_THRESHOLD:
-  //     result = setSNRThreshold(req.data);
-  //     res.applied_data = req.data;
-  //     res.applied_setting = req.setting;
-  //     break;
-
-  //   case req.SET_SIGNAL_THRESHOLD:
-  //     result = setSignalThreshold(req.data);
-  //     res.applied_data = req.data;
-  //     res.applied_setting = req.setting;
-  //     break;
-    
-  //   default:
-  //     break;
-  //   }
-    
-  //   // If we were acquiring data before, restart
-  //   if (!isAcquiring())
-  //   {
-  //     ROS_INFO_STREAM("Settings requested has been setted. Acquisition restart");
-  //     startAcquireData(active_register);
-  //   }
-  //   return result;
-  // }
-
-  // bool ProviderHydrophoneNode::changeMode(sonia_common::SetHydroMode::Request &req, sonia_common::SetHydroMode::Response &res)
-  // {
-  //   bool result = false;
-
-  //   // If is acquiring data, stop
-  //   if (isAcquiring())
-  //   {
-  //     ROS_INFO_STREAM("We were acquiring data. Acquisition will stop for a moment");
-  //     stopAcquireData();
-  //   }
-
-  //   if(req.register_selected == H1_REGISTER)
-  //   {
-  //     startAcquireData(H1_REGISTER);
-  //     ROS_INFO_STREAM("Acquisition of H1 Register");
-  //     result = true;
-  //   }
-  //   else if(req.register_selected == H6_REGISTER)
-  //   {
-  //     startAcquireData(H6_REGISTER);
-  //     ROS_INFO_STREAM("Acquisition of H6 Register");
-  //     result = true;
-  //   }
-  //   else
-  //   {
-  //     result = false;
-  //   }
-  //   res.action_accomplished = true;
-  //   return result;
-  // }
 
   bool ProviderHydrophoneNode::ConfirmChecksum(std::string data)
   {
     try
     {
-      std::string checksumData = data.substr(0, data.find("*", 0)); // Include de * of the checksum + 1
+      std::string checksumData = data.substr(0, data.find("*", 0)); // Include de * of the checksum + 1 TODO : confirmer
       uint8_t calculatedChecksum = CalculateChecksum(checksumData);
       uint8_t orignalChecksum = std::stoi(data.substr(data.find("*", 0)+1, 2), nullptr, 16);
       return orignalChecksum == calculatedChecksum;
@@ -398,11 +348,16 @@ namespace provider_hydrophone {
     return true;
   }
 
-  void ProviderHydrophoneNode::createDOACommand(std::vector<uint16_t> *argv)
+  void ProviderHydrophoneNode::createDOACommand()
   {
-    argv->push_back(snrThreshold_);
-    argv->push_back(signalLowThreshold_);
-    argv->push_back(signalHighThreshold_);
+    std::vector<uint16_t> argv;
+    argv.reserve(MAX_NUMBER_ARGS);
+
+    argv.push_back(snrThreshold_);
+    argv.push_back(signalLowThreshold_);
+    argv.push_back(signalHighThreshold_);
+    
+    sendCmd(DOA_CMD, &argv);
   }
 
   bool ProviderHydrophoneNode::setSNRThreshold(uint8_t threshold)
