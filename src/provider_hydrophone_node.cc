@@ -25,6 +25,8 @@
 
 #include "provider_hydrophone_node.h"
 
+#define POW2(x) x*x
+
 #define MAX_BUFFER_SIZE 4096
 #define MAX_NUMBER_ARGS 5
 
@@ -130,6 +132,7 @@ namespace provider_hydrophone {
     sonia_common::PingMsg ping_msg;
     std::string x = "";
     std::string y = "";
+    std::string z = "";
     std::string frequency = "";
     std::string debug = "";
 
@@ -146,23 +149,25 @@ namespace provider_hydrophone {
 
           ping_msg.header.stamp = ros::Time::now();
 
-          std::getline(ss, debug, ',');
-          std::getline(ss, debug, ',');
-
-          ping_msg.debug = stoi(debug);
-
           std::getline(ss, frequency, ',');
-
+          std::getline(ss, frequency, ',');
+          
           ping_msg.frequency = stoi(frequency);
 
           std::getline(ss, x, ',');
-          std::getline(ss, y, '*');
+          std::getline(ss, y, ',');
+          std::getline(ss, z, ',');
 
           float_t x_t = fixedToFloat(stoi(x));
           float_t y_t = fixedToFloat(stoi(y));
+          float_t z_t = fixedToFloat(stoi(z));
 
           ping_msg.heading = calculateHeading(x_t, y_t);
-          ping_msg.elevation = calculateElevation(x_t, y_t, stoi(frequency));
+          ping_msg.elevation = calculateElevation(x_t, y_t, z_t);
+
+          std::getline(ss, debug, '*');
+
+          ping_msg.debug = stoi(debug);
 
           pingPublisher_.publish(ping_msg);
         }
@@ -222,9 +227,9 @@ namespace provider_hydrophone {
     }
     else if(msg->cmd == sonia_common::HydroSettings::doa_settings)
     {
-      result = setSNRThreshold(msg->argv[0]);
-      result = setSignalLowThreshold(msg->argv[1]);
-      result = setSignalHighThreshold(msg->argv[2]);
+      result = setSNRThreshold(msg->argv[0]) && 
+                setSignalLowThreshold(msg->argv[1]) && 
+                setSignalHighThreshold(msg->argv[2]);
       createDOACommand();
     }
 
@@ -242,7 +247,7 @@ namespace provider_hydrophone {
   {
     try
     {
-      std::string checksumData = data.substr(0, data.find("*", 0)); // Include de * of the checksum + 1 TODO : confirmer
+      std::string checksumData = data.substr(0, data.find("*", 0)); // Include de * of the checksum + 1 TODO : devrait etre good
       uint8_t calculatedChecksum = CalculateChecksum(checksumData);
       uint8_t orignalChecksum = std::stoi(data.substr(data.find("*", 0)+1, 2), nullptr, 16);
       return orignalChecksum == calculatedChecksum;
@@ -419,17 +424,11 @@ namespace provider_hydrophone {
     return value * sign;
   }
   
-  float_t ProviderHydrophoneNode::calculateElevation(float_t x, float_t y, float_t frequency)
+  float_t ProviderHydrophoneNode::calculateElevation(float_t x, float_t y, float_t z)
   {
-    float_t t1 = 0.0, t2 = 0.0;
+    float_t sum = POW2(x) + POW2(y) + POW2(z);
 
-    t1 = (frequency * 2 * M_PI) / constant;
-    t2 = t1 * t1;
-
-    t2 -= (y * y) - (x * x);
-    t2 = sqrt(t2);
-
-    return acos(t2/t1);
+    return acos(z / sqrt(sum));
   }
 
   float_t ProviderHydrophoneNode::calculateHeading(float_t x, float_t y)
