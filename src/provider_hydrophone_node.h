@@ -31,11 +31,11 @@
 #include <condition_variable>
 #include <math.h>
 #include <string>
+#include <vector>
 
 #include <std_msgs/UInt32MultiArray.h>
 #include <sonia_common/PingMsg.h>
-#include <sonia_common/SetHydroSettings.h>
-#include <sonia_common/SetHydroMode.h>
+#include <sonia_common/HydroSettings.h>
 #include "Configuration.h"
 #include "drivers/serial.h"
 
@@ -44,6 +44,8 @@
 #define FIXED_POINT_DATA_MASK 0x3FFFFFFF
 #define H1_REGISTER "H1"
 #define H6_REGISTER "H6"
+
+typedef enum {idle, normalop, test_ping, raw_data} operation_mode;
 
 namespace provider_hydrophone {
 
@@ -67,36 +69,53 @@ namespace provider_hydrophone {
         Serial serialConnection_;
         ros::Publisher pingPublisher_;
         ros::Publisher debugPublisher_;
-        ros::ServiceServer settingsHydro_;
-        ros::ServiceServer modeHydro_;
+        ros::Subscriber settingsSubcriber_;
 
         void readThread();
         void h1RegisterThread();
         void h6RegisterThread();
-        bool changeSettings(sonia_common::SetHydroSettings::Request &req, sonia_common::SetHydroSettings::Response &res);
-        bool changeMode(sonia_common::SetHydroMode::Request &req, sonia_common::SetHydroMode::Response &res);
+
+        bool stopReadThread = false;
+        bool stoph1RegisterThread = false;
+        bool stoph6RegisterThread = false;
+
+        void changeSettings(const sonia_common::HydroSettings::ConstPtr& msg);
 
         bool ConfirmChecksum(std::string data);
         uint8_t CalculateChecksum(std::string data);
 
+        void sendCmd(std::string cmd, std::vector<uint16_t> *argv);
+
         bool isAcquiring();
-        void startAcquireData(std::string hydro_register);
+        void startAcquireData(operation_mode mode);
         void stopAcquireData();
+        bool changeMode(operation_mode mode);
 
         bool setGain(uint8_t gain);
+
+        void createDOACommand();
         bool setSNRThreshold(uint8_t threshold);
-        bool setSignalThreshold(uint32_t threshold);
+        bool setSignalLowThreshold(uint16_t threshold);
+        bool setSignalHighThreshold(uint16_t threshold);
+
+
         float_t fixedToFloat(uint32_t data);
 
         float_t calculateElevation(float_t x, float_t y, float_t frequency);
         float_t calculateHeading(float_t x, float_t y);
 
         uint8_t gain_ = 0;
-        uint8_t current_gain_ = 0;
-        uint16_t snrThreshold_ = 0;
-        uint16_t signalThreshold_ = 0;
-        bool acquiringNormalData_ = false;
-        bool acquiringDebugData_ = false;
+
+        uint8_t snrThreshold_ = 0;
+        uint16_t signalLowThreshold_ = 0;
+        uint16_t signalHighThreshold_ = 0;
+
+        uint16_t agcThreshold_ = 0;
+        uint16_t agcMaxThreshold_ = 0;
+        uint8_t agcToggleMode_ = 0;
+
+        operation_mode operation_mode_ = idle;
+
         std::string active_register = "";
 
         std::thread readerThread;
@@ -115,13 +134,14 @@ namespace provider_hydrophone {
         //-------------------------CONST--------------------------
         //--------------------------------------------------------
 
-        const std::string ENTER_COMMAND_CHAR = "\r\n";
-        const std::string SET_NORMAL_MODE_COMMAND = "1" + ENTER_COMMAND_CHAR;
-        const std::string SET_TEST_PING_MODE_COMMAND = "2" + ENTER_COMMAND_CHAR;
-        const std::string SET_GAIN_COMMAND = "3" + ENTER_COMMAND_CHAR;
-        const std::string SET_SNR_THRESHOLD = "4" + ENTER_COMMAND_CHAR;
-        const std::string SET_SIGNAL_THRESHOLD = "5" + ENTER_COMMAND_CHAR;
-        const std::string SET_RAW_DATA_MODE_COMMAND = "6" + ENTER_COMMAND_CHAR;
+        const std::string ENTER_COMMAND = "\n";
+        const std::string OPERATION_CMD = "op";
+        const std::string PGA_CMD = "pga";
+        const std::string DOA_CMD = "doa";
+        const std::string SET_GAIN_COMMAND = "3" + ENTER_COMMAND;
+        const std::string SET_SNR_THRESHOLD = "4" + ENTER_COMMAND;
+        const std::string SET_SIGNAL_THRESHOLD = "5" + ENTER_COMMAND;
+        const std::string SET_RAW_DATA_MODE_COMMAND = "6" + ENTER_COMMAND;
 
         const std::string EXIT_COMMAND = "q";
 

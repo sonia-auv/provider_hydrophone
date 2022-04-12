@@ -30,13 +30,7 @@ set(provider_hydrophone_SRC_DIR "src")
 find_package(
         catkin REQUIRED COMPONENTS
         roscpp
-        cmake_modules
-        dynamic_reconfigure
         sonia_common
-)
-
-generate_dynamic_reconfigure_options(
-        config/Hydro.cfg
 )
 
 catkin_package(
@@ -68,7 +62,6 @@ include_directories(
 add_executable(${PROJECT_NAME}_node ${provider_hydrophone_SRC_DIR}/main.cc ${provider_hydrophone_FILES})
 target_link_libraries(${PROJECT_NAME}_node
         ${catkin_LIBRARIES}
-        yaml-cpp
         )
 
 add_dependencies(${PROJECT_NAME}_node ${catkin_EXPORTED_TARGETS})
