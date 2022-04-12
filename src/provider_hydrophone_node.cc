@@ -435,5 +435,4 @@ namespace provider_hydrophone {
   {
     return atan2(y,x);
   }  
-
 }  // namespace provider_hydrophone
