@@ -217,15 +217,15 @@ namespace provider_hydrophone {
   {
     bool result = false;
     
-    if(msg->cmd == sonia_common::HydroSettings::operation_mode)
+    if(msg->cmd == "op")
     {
       result = changeMode((operation_mode) msg->argv[0]);
     }
-    else if(msg->cmd == sonia_common::HydroSettings::pga_gain)
+    else if(msg->cmd == "pga")
     {
       result = setGain((uint8_t) msg->argv[0]);
     }
-    else if(msg->cmd == sonia_common::HydroSettings::doa_settings)
+    else if(msg->cmd == "doa")
     {
       result = setSNRThreshold(msg->argv[0]) && 
                 setSignalLowThreshold(msg->argv[1]) && 
