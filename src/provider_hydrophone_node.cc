@@ -161,7 +161,10 @@ namespace provider_hydrophone {
           float_t x_t = fixedToFloat(stoi(x));
           float_t y_t = fixedToFloat(stoi(y));
           float_t z_t = fixedToFloat(stoi(z));
-
+          
+          ping_msg.x = x_t;
+          ping_msg.y = y_t;
+          ping_msg.z = z_t;
           ping_msg.heading = calculateHeading(x_t, y_t);
           ping_msg.elevation = calculateElevation(x_t, y_t, z_t);
 
