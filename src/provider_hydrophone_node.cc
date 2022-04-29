@@ -73,7 +73,7 @@ namespace provider_hydrophone {
   {
     ros::Rate r(10);  // 10 hz
 
-    startAcquireData(raw_data);
+    startAcquireData(normalop);
 
     while (ros::ok()) 
     {
@@ -90,40 +90,41 @@ namespace provider_hydrophone {
 
     while(!stopReadThread)
     {
-      if(isAcquiring())
+      do
       {
-        do
-        {
-          serialConnection_.readOnce(buffer, 0);
-        } while (buffer[0] != 'H');
+        serialConnection_.readOnce(buffer, 0);
+      } while (buffer[0] != 'H' && buffer[0] != '>');
 
-        uint16_t i;
-        for(i =1; buffer[i-1] != '\n' && i < MAX_BUFFER_SIZE; ++i)
-        {
-          serialConnection_.readOnce(buffer, i);
-        }
-        
-        if(i >= MAX_BUFFER_SIZE)
-        {
-          continue;
-        }
-
-        buffer[i] = '\0';
-
-        if(!strncmp(&buffer[0], H1_REGISTER, 2))
-        {
-          std::unique_lock<std::mutex> mlock(h1_mutex);
-          h1_string = std::string(buffer);
-          h1_cond.notify_one();
-        }
-        if(!strncmp(&buffer[0], H6_REGISTER, 2))
-        {
-          std::unique_lock<std::mutex> mlock(h6_mutex);
-          h6_string = std::string(buffer);
-          h6_cond.notify_one();
-        }
+      uint16_t i;
+      for(i =1; buffer[i-1] != '\n' && i < MAX_BUFFER_SIZE; ++i)
+      {
+        serialConnection_.readOnce(buffer, i);
       }
-      else r.sleep();
+      
+      if(i >= MAX_BUFFER_SIZE)
+      {
+        continue;
+      }
+
+      buffer[i] = '\0';
+
+      if(!strncmp(&buffer[0], H1_REGISTER, 2))
+      {
+        std::unique_lock<std::mutex> mlock(h1_mutex);
+        h1_string = std::string(buffer);
+        h1_cond.notify_one();
+      }
+      if(!strncmp(&buffer[0], H6_REGISTER, 2))
+      {
+        std::unique_lock<std::mutex> mlock(h6_mutex);
+        h6_string = std::string(buffer);
+        h6_cond.notify_one();
+      }
+      if(!strncmp(&buffer[0], ">", 1))
+      {
+        buffer[i-1] = '\0';
+        ROS_INFO_STREAM("Board response " << buffer);
+      }
     }
   }
 
@@ -278,19 +279,26 @@ namespace provider_hydrophone {
     std::string send_string = cmd;
     size_t len = argv->size();
 
-    for(uint8_t i = 0; i < len; ++i)
+    if(cmd == OPERATION_CMD && argv->at(0) == (uint16_t)idle)
     {
-      send_string += " " + std::to_string(argv->at(i));
+      serialConnection_.transmit(EXIT_COMMAND);
     }
-    send_string += ENTER_COMMAND;
-    serialConnection_.transmit(send_string);
+    else
+    {
+      for(uint8_t i = 0; i < len; ++i)
+      {
+        send_string += " " + std::to_string(argv->at(i));
+      }
+      send_string += ENTER_COMMAND;
+      serialConnection_.transmit(send_string);
+    }
     ros::Duration(0.5).sleep(); // Give time for the board receive and interpret data
-    serialConnection_.flush();
+    //serialConnection_.flush();
   }
 
   bool ProviderHydrophoneNode::isAcquiring() 
   {
-    return operation_mode_ == idle;
+    return operation_mode_ != idle;
   }
 
   void ProviderHydrophoneNode::startAcquireData(operation_mode mode)
@@ -328,11 +336,18 @@ namespace provider_hydrophone {
       ROS_ERROR_STREAM("Error with the requested operation mode"); 
       return false;
     }
+
+    if(mode == operation_mode_)
+    {
+      ROS_INFO_STREAM("Already in the right mode");
+      return true;
+    }
+
     operation_mode_ = mode;
     argv.push_back((uint16_t)mode);
     sendCmd(OPERATION_CMD, &argv);
 
-    ROS_INFO_STREAM("Mode has been changed : " << operation_mode_);
+    ROS_INFO_STREAM("Mode has been changed : " << std::to_string((uint8_t)operation_mode_));
     return true;
   }
 
@@ -352,7 +367,7 @@ namespace provider_hydrophone {
     argv.push_back((uint16_t)gain);
     sendCmd(PGA_CMD, &argv);
 
-    ROS_INFO_STREAM("Gain has been setted : " << gain_);
+    ROS_INFO_STREAM("Gain has been setted : " << std::to_string(gain_));
     return true;
   }
 
@@ -378,7 +393,7 @@ namespace provider_hydrophone {
       return false;
     }
     snrThreshold_ = threshold;
-    ROS_INFO_STREAM("SNR Threshold has been setted : " << threshold);
+    ROS_INFO_STREAM("SNR Threshold has been setted : " << std::to_string(threshold));
     return true;
   }
 
@@ -392,7 +407,7 @@ namespace provider_hydrophone {
       return false;
     }
     signalLowThreshold_ = threshold;
-    ROS_INFO_STREAM("Signal Low Threshold has been setted : " << threshold);
+    ROS_INFO_STREAM("Signal Low Threshold has been setted : " << std::to_string(threshold));
     return true;
   }
 
@@ -406,7 +421,7 @@ namespace provider_hydrophone {
       return false;
     }
     signalHighThreshold_ = threshold;
-    ROS_INFO_STREAM("Signal High Threshold has been setted : " << threshold);
+    ROS_INFO_STREAM("Signal High Threshold has been setted : " << std::to_string(threshold));
     return true;
   }
 

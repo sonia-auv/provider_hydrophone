@@ -138,10 +138,8 @@ namespace provider_hydrophone {
         const std::string OPERATION_CMD = "op";
         const std::string PGA_CMD = "pga";
         const std::string DOA_CMD = "doa";
-        const std::string SET_GAIN_COMMAND = "3" + ENTER_COMMAND;
-        const std::string SET_SNR_THRESHOLD = "4" + ENTER_COMMAND;
-        const std::string SET_SIGNAL_THRESHOLD = "5" + ENTER_COMMAND;
-        const std::string SET_RAW_DATA_MODE_COMMAND = "6" + ENTER_COMMAND;
+
+        // Ajouter AGC lorsque tester
 
         const std::string EXIT_COMMAND = "q";
 
