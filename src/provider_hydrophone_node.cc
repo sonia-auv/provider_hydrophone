@@ -169,7 +169,7 @@ namespace provider_hydrophone {
           ping_msg.heading = calculateHeading(x_t, y_t);
           ping_msg.elevation = calculateElevation(x_t, y_t, z_t);
 
-          std::getline(ss, debug, '*');
+          std::getline(ss, debug, '\n');
 
           ping_msg.debug = stoi(debug);
 
