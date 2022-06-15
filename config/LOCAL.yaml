@@ -1,0 +1,11 @@
+#Constants informations
+#PGA
+/provider_hydrophone/hydrophone/gain: 2
+
+#DOA
+/provider_hydrophone/hydrophone/snr_threshold : 10
+/provider_hydrophone/hydrophone/signal_low_threshold : 30000
+/provider_hydrophone/hydrophone/signal_high_threshold : 35000
+
+#USB
+/provider_hydrophone/connection/tty_port: "/dev/ttyUSB0"

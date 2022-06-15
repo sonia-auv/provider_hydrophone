@@ -40,6 +40,14 @@ Docker version 19.03.5, build 633a0ea
 
 It means you have it installed. If not follow instructions on how to install it for your OS.
 
+## Testing with the Jetson TX2
+
+Run le container
+docker run --name provider_hydro -it --privileged -e AUV=LOCAL -e ROS_MASTER_URI=http://192.168.0.104:11311 -e ROS_IP=192.168.0.117 --network=host --mount type=bind,src=/dev,dst=/dev  --mount type=bind,src=/home/sonia/Documents/bags,dst=/home/sonia/ros_sonia_ws/src/bags ghcr.io/sonia-auv/provider_hydrophone/provider_hydrophone:arm64-perception-"branch to test" bash
+
+Test le board
+sudo picocom -b 230400 -c /dev/ttyUSB0
+
 ## UML
 
 Here is the UML linked to this provider : [Lucidchart UML](https://lucid.app/publicSegments/view/55152d26-6365-45a3-a816-881156453cf4)

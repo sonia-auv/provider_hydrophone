@@ -8,7 +8,7 @@
 #===============================================================================
 # G L O B A L   P R O J E C T   C O N F I G U R A T I O N
 
-cmake_minimum_required(VERSION 2.8.0)
+cmake_minimum_required(VERSION 3.0.2)
 project(provider_hydrophone)
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -30,13 +30,7 @@ set(provider_hydrophone_SRC_DIR "src")
 find_package(
         catkin REQUIRED COMPONENTS
         roscpp
-        cmake_modules
-        dynamic_reconfigure
         sonia_common
-)
-
-generate_dynamic_reconfigure_options(
-        cfg/Hydro.cfg
 )
 
 catkin_package(
@@ -68,7 +62,6 @@ include_directories(
 add_executable(${PROJECT_NAME}_node ${provider_hydrophone_SRC_DIR}/main.cc ${provider_hydrophone_FILES})
 target_link_libraries(${PROJECT_NAME}_node
         ${catkin_LIBRARIES}
-        yaml-cpp
         )
 
 add_dependencies(${PROJECT_NAME}_node ${catkin_EXPORTED_TARGETS})
