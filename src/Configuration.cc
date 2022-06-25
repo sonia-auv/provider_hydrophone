@@ -31,7 +31,7 @@ namespace provider_hydrophone
         FindParameter("/hydrophone/gain", gain);
 
         FindParameter("/hydrophone/snr_threshold", snrThreshold);
-        FindParameter("/hydrophone/high_signal_threshold", highSignalThreshold);
+        FindParameter("/hydrophone/signal_high_threshold", highSignalThreshold);
         FindParameter("/hydrophone/signal_low_threshold", lowSignalThreshold);
 
         FindParameter("/hydrophone/agc_on", agcActivation);
