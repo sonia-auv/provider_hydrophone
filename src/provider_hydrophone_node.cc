@@ -435,12 +435,12 @@ namespace provider_hydrophone {
     return true;
   }
 
-  void createAGCCommand()
+  void ProviderHydrophoneNode::createAGCCommand()
   {
 
   }
 
-  bool setAGCToggle(uint8_t toggle)
+  bool ProviderHydrophoneNode::setAGCToggle(uint8_t toggle)
   {
     ROS_DEBUG_STREAM("Changing the mode for the AGC");
 
@@ -450,16 +450,16 @@ namespace provider_hydrophone {
       return false;
     }
     agcToggleMode_ = toggle;
-    ROS_INFO_STREAM("The AGC has been toggle with the value " << std::to_string(toggle));
+    ROS_INFO_STREAM("The AGC has been toggle with the value " << std::to_string(toggle));
     return true;
   }
 
-  bool setSignalThreshold(uint16_t threshold)
+  bool ProviderHydrophoneNode::setSignalThreshold(uint16_t threshold)
   {
 
   }
 
-  bool setLimitSignalThreshold(uint16_t threshold)
+  bool ProviderHydrophoneNode::setLimitSignalThreshold(uint16_t threshold)
   {
     
   }
