@@ -27,6 +27,9 @@
 #define PROVIDER_HYDROPHONE_NODE_H_
 
 #include <ros/ros.h>
+#include <dynamic_reconfigure/server.h>
+#include <provider_hydrophone/HydroConfig.h>
+
 #include <thread>
 #include <condition_variable>
 #include <math.h>
@@ -61,10 +64,12 @@ namespace provider_hydrophone {
         ~ProviderHydrophoneNode();
 
         void Spin();
+        void CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level);
 
     private:
         
         ros::NodeHandlePtr nh_;
+        dynamic_reconfigure::Server<provider_hydrophone::HydroConfig> server;
         Configuration configuration_;
         Serial serialConnection_;
         ros::Publisher pingPublisher_;
@@ -98,6 +103,10 @@ namespace provider_hydrophone {
         bool setSignalLowThreshold(uint16_t threshold);
         bool setSignalHighThreshold(uint16_t threshold);
 
+        void createAGCCommand();
+        bool setAGCToggle(uint8_t toggle);
+        bool setSignalThreshold(uint16_t threshold);
+        bool setLimitSignalThreshold(uint16_t threshold);
 
         float_t fixedToFloat(uint32_t data);
 
@@ -110,9 +119,9 @@ namespace provider_hydrophone {
         uint16_t signalLowThreshold_ = 0;
         uint16_t signalHighThreshold_ = 0;
 
+        uint8_t agcToggleMode_ = 0;
         uint16_t agcThreshold_ = 0;
         uint16_t agcMaxThreshold_ = 0;
-        uint8_t agcToggleMode_ = 0;
 
         operation_mode operation_mode_ = idle;
 
@@ -138,8 +147,7 @@ namespace provider_hydrophone {
         const std::string OPERATION_CMD = "op";
         const std::string PGA_CMD = "pga";
         const std::string DOA_CMD = "doa";
-
-        // Ajouter AGC lorsque tester
+        const std::string AFC_CMD = "agc";
 
         const std::string EXIT_COMMAND = "q";
 

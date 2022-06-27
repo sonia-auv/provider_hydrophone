@@ -54,6 +54,9 @@ namespace provider_hydrophone {
     readerThread = std::thread(std::bind(&ProviderHydrophoneNode::readThread, this));
     h1ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h1RegisterThread, this));
     h6ParseThread = std::thread(std::bind(&ProviderHydrophoneNode::h6RegisterThread, this));
+
+    // Dynamic Reconfigure Server
+    server.setCallback(boost::bind(&ProviderHydrophoneNode::CallBackDynamicReconfigure, this, _1, _2));
   }
 
   //------------------------------------------------------------------------------
@@ -80,6 +83,11 @@ namespace provider_hydrophone {
       ros::spinOnce();
       r.sleep();
     }
+  }
+
+  void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
+  {
+    // do nothing for the moment
   }
 
   void ProviderHydrophoneNode::readThread()
@@ -425,6 +433,35 @@ namespace provider_hydrophone {
     signalHighThreshold_ = threshold;
     ROS_INFO_STREAM("Signal High Threshold has been setted : " << std::to_string(threshold));
     return true;
+  }
+
+  void createAGCCommand()
+  {
+
+  }
+
+  bool setAGCToggle(uint8_t toggle)
+  {
+    ROS_DEBUG_STREAM("Changing the mode for the AGC");
+
+    if(toggle != 0 || toggle != 1)
+    {
+      ROS_ERROR_STREAM("Error with the request to toggle the AGC");
+      return false;
+    }
+    agcToggleMode_ = toggle;
+    ROS_INFO_STREAM("The AGC has been toggle with the value " << std::to_string(toggle));
+    return true;
+  }
+
+  bool setSignalThreshold(uint16_t threshold)
+  {
+
+  }
+
+  bool setLimitSignalThreshold(uint16_t threshold)
+  {
+    
   }
 
   float_t ProviderHydrophoneNode::fixedToFloat(uint32_t data)
