@@ -195,7 +195,7 @@ namespace provider_hydrophone {
       
       try
       {
-        if(!h6_string.empty() && ConfirmChecksum(h6_string))
+        if(!h6_string.empty())
         {
           std::stringstream ss(h6_string);
           std::getline(ss, tmp, ',');
@@ -236,7 +236,10 @@ namespace provider_hydrophone {
                 setSignalHighThreshold(msg->argv[2]);
       createDOACommand();
     }
-
+    else if(msg->cmd == "agc")
+    {
+      ROS_WARN_STREAM("AGC has not been implemented yet. Work in progress!");
+    }
     if(result)
     {
       ROS_DEBUG_STREAM("Setting has been changed");
@@ -293,7 +296,6 @@ namespace provider_hydrophone {
       serialConnection_.transmit(send_string);
     }
     ros::Duration(0.5).sleep(); // Give time for the board receive and interpret data
-    //serialConnection_.flush();
   }
 
   bool ProviderHydrophoneNode::isAcquiring() 
