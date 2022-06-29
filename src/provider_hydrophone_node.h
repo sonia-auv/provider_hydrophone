@@ -138,6 +138,8 @@ namespace provider_hydrophone {
         std::condition_variable h6_cond;
         std::string h6_string;
         std::mutex h6_mutex;
+
+        std::mutex dynamic_reconfigure_mutex;
         
         //--------------------------------------------------------
         //-------------------------CONST--------------------------

@@ -87,7 +87,41 @@ namespace provider_hydrophone {
 
   void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
   {
-    // do nothing for the moment
+    operation_mode current_mode =  operation_mode_;
+
+    // To block multiple change at the same time
+    dynamic_reconfigure_mutex.lock();
+    stopAcquireData();
+
+    /* Feature to add in the dynamic reconfigure
+    if(current_mode != config.Mode)
+    {
+      
+    }*/
+    if(gain_ != config.Gain)
+    {
+      ROS_INFO_STREAM("New gain : " << std::to_string(config.Gain) << " Old gain : " << std::to_string(gain_));
+      setGain((uint8_t)config.Gain);
+    }
+    if(snrThreshold_ != config.SNR || signalLowThreshold_ != config.Low_Threshold || signalHighThreshold_ != config.High_Threshold)
+    {
+      ROS_INFO_STREAM("New SNR : " << std::to_string(config.SNR) << " Old SNR : " << std::to_string(snrThreshold_));
+      ROS_INFO_STREAM("New High Threshold : " << std::to_string(config.High_Threshold) << " Old High Threshold : " << std::to_string(signalHighThreshold_));
+      ROS_INFO_STREAM("New Low Threshold : " << std::to_string(config.Low_Threshold) << " Old Low Threshold : " << std::to_string(signalLowThreshold_));
+      setSNRThreshold((uint8_t)config.SNR);
+      setSignalLowThreshold((uint16_t)config.High_Threshold);
+      setSignalHighThreshold((uint16_t)config.Low_Threshold);
+      createDOACommand();
+    }
+    /* Add AGC when it's has been implemented with the topic
+    if()
+    {
+
+    }
+    */
+
+    startAcquireData(current_mode);
+    dynamic_reconfigure_mutex.unlock();
   }
 
   void ProviderHydrophoneNode::readThread()
