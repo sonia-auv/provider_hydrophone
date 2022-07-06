@@ -166,8 +166,8 @@ namespace provider_hydrophone {
           ping_msg.x = x_t;
           ping_msg.y = y_t;
           ping_msg.z = z_t;
-          ping_msg.heading = calculateHeading(x_t, y_t);
-          ping_msg.elevation = calculateElevation(x_t, y_t, z_t);
+          ping_msg.heading = 0;
+          ping_msg.elevation = 0;
 
           std::getline(ss, debug, '\n');
 
