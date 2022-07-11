@@ -293,7 +293,7 @@ namespace provider_hydrophone {
       send_string += ENTER_COMMAND;
       serialConnection_.transmit(send_string);
     }
-    ros::Duration(0.5).sleep(); // Give time for the board receive and interpret data
+    ros::Duration(1).sleep(); // Give time for the board receive and interpret data
   }
 
   bool ProviderHydrophoneNode::isAcquiring() 
