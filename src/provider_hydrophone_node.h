@@ -40,7 +40,7 @@
 #include "drivers/serial.h"
 
 #define FIXED_POINT_FRACTIONAL_BITS 19
-#define SIGNED_MASK 0x40000000
+#define SIGNED_MASK 0x80000000
 #define FIXED_POINT_DATA_MASK 0x3FFFFFFF
 #define H1_REGISTER "H1"
 #define H6_REGISTER "H6"
@@ -100,9 +100,6 @@ namespace provider_hydrophone {
 
 
         float_t fixedToFloat(uint32_t data);
-
-        float_t calculateElevation(float_t x, float_t y, float_t frequency);
-        float_t calculateHeading(float_t x, float_t y);
 
         uint8_t gain_ = 0;
 

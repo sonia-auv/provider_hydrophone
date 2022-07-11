@@ -131,10 +131,11 @@ namespace provider_hydrophone {
   void ProviderHydrophoneNode::h1RegisterThread()
   {
     sonia_common::PingMsg ping_msg;
-    std::string x = "";
-    std::string y = "";
-    std::string z = "";
-    std::string frequency = "";
+    std::string phaseRef = "";
+    std::string phase1 = "";
+    std::string phase2 = "";
+    std::string phase3 = "";
+    std::string index = "";
     std::string debug = "";
 
     while(!stoph1RegisterThread)
@@ -150,29 +151,26 @@ namespace provider_hydrophone {
 
           ping_msg.header.stamp = ros::Time::now();
 
-          std::getline(ss, frequency, ',');
-          std::getline(ss, frequency, ',');
-          
-          ping_msg.frequency = stoi(frequency);
+          std::getline(ss, phase3, ',');
+          std::getline(ss, phase3, ',');
+          std::getline(ss, phaseRef, ',');
+          std::getline(ss, phase1, ',');
+          std::getline(ss, phase2, ',');
+          std::getline(ss, debug, ',');
+          std::getline(ss, index, '\n');
 
-          std::getline(ss, x, ',');
-          std::getline(ss, y, ',');
-          std::getline(ss, z, ',');
+          float_t phase3_ = fixedToFloat(std::stoi(phase3));
+          float_t phaseRef_ = fixedToFloat(std::stoi(phaseRef));
+          float_t phase1_ = fixedToFloat(std::stoi(phase1));
+          float_t phase2_ = fixedToFloat(std::stoi(phase2));
 
-          float_t x_t = fixedToFloat(stoi(x));
-          float_t y_t = fixedToFloat(stoi(y));
-          float_t z_t = fixedToFloat(stoi(z));
-          
-          ping_msg.x = x_t;
-          ping_msg.y = y_t;
-          ping_msg.z = z_t;
-          ping_msg.heading = 0;
-          ping_msg.elevation = 0;
-
-          std::getline(ss, debug, '\n');
-
+          ping_msg.phaseRef = phaseRef_;
+          ping_msg.phase1 = phase1_;
+          ping_msg.phase2 = phase2_;
+          ping_msg.phase3 = phase3_;
           ping_msg.debug = stoi(debug);
-
+          ping_msg.frequency = stoi(index) * 1000;
+          
           pingPublisher_.publish(ping_msg);
         }
       }
@@ -443,16 +441,5 @@ namespace provider_hydrophone {
     value /= pow(2.0, FIXED_POINT_FRACTIONAL_BITS); 
     return value * sign;
   }
-  
-  float_t ProviderHydrophoneNode::calculateElevation(float_t x, float_t y, float_t z)
-  {
-    float_t sum = POW2(x) + POW2(y) + POW2(z);
 
-    return acos(z / sqrt(sum));
-  }
-
-  float_t ProviderHydrophoneNode::calculateHeading(float_t x, float_t y)
-  {
-    return atan2(y,x);
-  }  
 }  // namespace provider_hydrophone
