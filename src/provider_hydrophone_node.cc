@@ -93,24 +93,25 @@ namespace provider_hydrophone {
     dynamic_reconfigure_mutex.lock();
     stopAcquireData();
 
-    /* Feature to add in the dynamic reconfigure
+    // Feature to add in the dynamic reconfigure
     if(current_mode != config.Mode)
     {
-      
-    }*/
-    if(gain_ != config.Gain)
+      ROS_INFO_STREAM("New mode : " << std::to_string(config.Mode) << " Currrent mode : " << std::to_string(operation_mode_));
+      changeMode((operation_mode)config.Mode);
+    }
+    else if(gain_ != config.Gain)
     {
       ROS_INFO_STREAM("New gain : " << std::to_string(config.Gain) << " Old gain : " << std::to_string(gain_));
       setGain((uint8_t)config.Gain);
     }
-    if(snrThreshold_ != config.SNR || signalLowThreshold_ != config.Low_Threshold || signalHighThreshold_ != config.High_Threshold)
+    else if(snrThreshold_ != config.SNR || signalLowThreshold_ != config.Low_Threshold || signalHighThreshold_ != config.High_Threshold)
     {
       ROS_INFO_STREAM("New SNR : " << std::to_string(config.SNR) << " Old SNR : " << std::to_string(snrThreshold_));
       ROS_INFO_STREAM("New High Threshold : " << std::to_string(config.High_Threshold) << " Old High Threshold : " << std::to_string(signalHighThreshold_));
       ROS_INFO_STREAM("New Low Threshold : " << std::to_string(config.Low_Threshold) << " Old Low Threshold : " << std::to_string(signalLowThreshold_));
       setSNRThreshold((uint8_t)config.SNR);
-      setSignalLowThreshold((uint16_t)config.High_Threshold);
-      setSignalHighThreshold((uint16_t)config.Low_Threshold);
+      setSignalHighThreshold((uint16_t)config.High_Threshold);
+      setSignalLowThreshold((uint16_t)config.Low_Threshold);
       createDOACommand();
     }
     /* Add AGC when it's has been implemented with the topic
@@ -120,7 +121,7 @@ namespace provider_hydrophone {
     }
     */
 
-    startAcquireData(current_mode);
+    if(current_mode == operation_mode_) startAcquireData(current_mode);
     dynamic_reconfigure_mutex.unlock();
   }
 
@@ -263,6 +264,9 @@ namespace provider_hydrophone {
   {
     bool result = false;
     
+    // To block multiple change at the same time
+    dynamic_reconfigure_mutex.lock();
+
     if(msg->cmd == "op")
     {
       result = changeMode((operation_mode) msg->argv[0]);
@@ -290,6 +294,8 @@ namespace provider_hydrophone {
     {
       ROS_ERROR_STREAM("Error with the settings change");
     }
+
+    dynamic_reconfigure_mutex.unlock();
   }
 
   bool ProviderHydrophoneNode::ConfirmChecksum(std::string data)
