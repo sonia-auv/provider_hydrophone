@@ -31,6 +31,11 @@ find_package(
         catkin REQUIRED COMPONENTS
         roscpp
         sonia_common
+        dynamic_reconfigure
+)
+
+generate_dynamic_reconfigure_options(
+        cfg/hydro.cfg
 )
 
 catkin_package(
