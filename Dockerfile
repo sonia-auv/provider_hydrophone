@@ -1,4 +1,4 @@
-ARG BASE_IMAGE="docker.pkg.github.com/sonia-auv/sonia_common/sonia_common:x86-perception-latest"
+ARG BASE_IMAGE="ghcr.io/sonia-auv/sonia_common/sonia_common:x86-perception-latest"
 
 FROM ${BASE_IMAGE}
 
@@ -20,6 +20,7 @@ ENV NODE_NAME=${NODE_NAME}
 ENV NODE_PATH=${SONIA_WS}/src/${NODE_NAME}
 ENV LAUNCH_FILE=${NODE_NAME}.launch
 ENV SCRIPT_DIR=${SONIA_WS}/scripts
+ENV CFG_DIR=${SONIA_WS}/cfg
 ENV ENTRYPOINT_FILE=sonia_entrypoint.sh
 ENV LAUNCH_ABSPATH=${NODE_PATH}/launch/${LAUNCH_FILE}
 ENV ENTRYPOINT_ABSPATH=${NODE_PATH}/scripts/${ENTRYPOINT_FILE}
@@ -28,10 +29,11 @@ ENV SONIA_WS_SETUP=${SONIA_WS}/devel/setup.bash
 
 WORKDIR ${SONIA_WS}
 
-COPY . ${NODE_PATH}
+COPY . ${NODE_PATH} 
 RUN bash -c "source ${ROS_WS_SETUP}; source ${BASE_LIB_WS_SETUP}; catkin_make"
 
 RUN chown -R ${SONIA_USER}: ${SONIA_WS}
+RUN usermod -a -G dialout ${SONIA_USER}
 USER ${SONIA_USER}
 
 RUN mkdir ${SCRIPT_DIR}

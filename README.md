@@ -40,47 +40,17 @@ Docker version 19.03.5, build 633a0ea
 
 It means you have it installed. If not follow instructions on how to install it for your OS.
 
-### Installing
+## Testing with the Jetson TX2
 
-A step by step series of examples that tell you how to get a development env running
+Run le container
+docker run --name provider_hydro -it --privileged -e AUV=LOCAL -e ROS_MASTER_URI=http://192.168.0.104:11311 -e ROS_IP=192.168.0.117 --network=host --mount type=bind,src=/dev,dst=/dev  --mount type=bind,src=/home/sonia/Documents/bags,dst=/home/sonia/ros_sonia_ws/src/bags ghcr.io/sonia-auv/provider_hydrophone/provider_hydrophone:arm64-perception-"branch to test" bash
 
-Say what the step will be
+Test le board
+sudo picocom -b 230400 -c /dev/ttyUSB0
 
-```
-Give the example
-```
+## UML
 
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
+Here is the UML linked to this provider : [Lucidchart UML](https://lucid.app/publicSegments/view/55152d26-6365-45a3-a816-881156453cf4)
 
 ## Built With
 

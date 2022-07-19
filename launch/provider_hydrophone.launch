@@ -1,8 +1,5 @@
 <launch>
-	<node name="provider_hydrophone"
-	    pkg="provider_hydrophone"
-	    type="provider_hydrophone_node"
-	    output="screen" />
-	<rosparam command="load"
-        file="$(find provider_hydrophone)/config/provider_hydrophone_conf.yaml"/>
+	<node name="provider_hydrophone" pkg="provider_hydrophone" type="provider_hydrophone_node" output="screen" />
+
+	<rosparam command="load" file="$(find provider_hydrophone)/config/$(env AUV).yaml"/>
 </launch>
