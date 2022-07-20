@@ -109,20 +109,20 @@ namespace provider_hydrophone {
       ROS_INFO_STREAM("New SNR : " << std::to_string(config.SNR) << " Old SNR : " << std::to_string(snrThreshold_));
       ROS_INFO_STREAM("New High Threshold : " << std::to_string(config.High_Threshold) << " Old High Threshold : " << std::to_string(signalHighThreshold_));
       ROS_INFO_STREAM("New Low Threshold : " << std::to_string(config.Low_Threshold) << " Old Low Threshold : " << std::to_string(signalLowThreshold_));
-      setSNRThreshold((uint8_t)config.SNR);
-      setSignalHighThreshold((uint16_t)config.High_Threshold);
-      setSignalLowThreshold((uint16_t)config.Low_Threshold);
-      createDOACommand();
+      createDOACommand((uint8_t)config.SNR, (uint16_t)config.Low_Threshold, (uint16_t)config.High_Threshold);
     }
-    /* Add AGC when it's has been implemented with the topic
-    if()
+    else if(agcToggleMode_ != config.Active_AGC || agcThreshold_ != config.Signal_Threshold || agcMaxThreshold_ != config.Limit_Signal_Threshold)
     {
-
+      ROS_INFO_STREAM("AGC toggle : " << std::to_string(config.Active_AGC) << " Previous State : " << std::to_string(agcToggleMode_));
+      ROS_INFO_STREAM("New Signal Threshold : " << std::to_string(config.Signal_Threshold) << " Old Signal Threshold : " << std::to_string(agcThreshold_));
+      ROS_INFO_STREAM("New Limit Threshold : " << std::to_string(config.Limit_Signal_Threshold) << " Old Limit Threshold : " << std::to_string(agcMaxThreshold_));
+      createAGCCommand((uint8_t)config.Active_AGC, (uint16_t)config.Signal_Threshold, (uint16_t)config.Limit_Signal_Threshold);
     }
-    */
 
-    if(current_mode == operation_mode_) startAcquireData(current_mode);
+    if(current_mode != config.Mode) startAcquireData(current_mode);
     dynamic_reconfigure_mutex.unlock();
+
+    ROS_WARN_STREAM("REMINDER : Change the rosparam with the new settings!!!");
   }
 
   void ProviderHydrophoneNode::readThread()
@@ -275,14 +275,11 @@ namespace provider_hydrophone {
     }
     else if(msg->cmd == "doa")
     {
-      result = setSNRThreshold(msg->argv[0]) && 
-                setSignalLowThreshold(msg->argv[1]) && 
-                setSignalHighThreshold(msg->argv[2]);
-      createDOACommand();
+      result = createDOACommand(msg->argv[0], msg->argv[1], msg->argv[2]);
     }
     else if(msg->cmd == "agc")
     {
-      ROS_WARN_STREAM("AGC has not been implemented yet. Work in progress!");
+      result = createAGCCommand(msg->argv[0], msg->argv[1], msg->argv[2]);
     }
     if(result)
     {
@@ -419,6 +416,14 @@ namespace provider_hydrophone {
     return true;
   }
 
+  bool ProviderHydrophoneNode::createDOACommand(uint8_t snr, uint16_t lowth, uint16_t highth)
+  {
+    bool result = setSNRThreshold(snr) && setSignalLowThreshold(lowth) && 
+                  setSignalHighThreshold(highth);
+    createDOACommand();
+    return result;
+  }
+
   void ProviderHydrophoneNode::createDOACommand()
   {
     std::vector<uint16_t> argv;
@@ -473,9 +478,24 @@ namespace provider_hydrophone {
     return true;
   }
 
+  bool ProviderHydrophoneNode::createAGCCommand(uint8_t toggle, uint16_t signalth, uint16_t limitth)
+  {
+    bool result = setAGCToggle(toggle) && setSignalThreshold(signalth) &&
+                  setLimitSignalThreshold(limitth);
+    createAGCCommand();
+    return result;
+  }
+
   void ProviderHydrophoneNode::createAGCCommand()
   {
+    std::vector<uint16_t> argv;
+    argv.reserve(MAX_NUMBER_ARGS);
 
+    argv.push_back(agcToggleMode_);
+    argv.push_back(agcThreshold_);
+    argv.push_back(agcMaxThreshold_);
+    
+    sendCmd(AGC_CMD, &argv);
   }
 
   bool ProviderHydrophoneNode::setAGCToggle(uint8_t toggle)
@@ -494,12 +514,30 @@ namespace provider_hydrophone {
 
   bool ProviderHydrophoneNode::setSignalThreshold(uint16_t threshold)
   {
+    ROS_DEBUG_STREAM("Setting new Signal Threshold (AGC)");
 
+    if(threshold < 0 || threshold > 65535)
+    {
+      ROS_ERROR_STREAM("Error with the requested Signal Threshold (AGC)");
+      return false;
+    }
+    agcThreshold_ = threshold;
+    ROS_INFO_STREAM("Signal Threshold (AGC) has been setted : " << std::to_string(threshold));
+    return true;
   }
 
   bool ProviderHydrophoneNode::setLimitSignalThreshold(uint16_t threshold)
   {
-    
+    ROS_DEBUG_STREAM("Setting new Limit Signal Threshold");
+
+    if(threshold < 0 || threshold > 65535)
+    {
+      ROS_ERROR_STREAM("Error with the requested Signal High Threshold");
+      return false;
+    }
+    agcMaxThreshold_ = threshold;
+    ROS_INFO_STREAM("Limit Signal Threshold has been setted : " << std::to_string(threshold));
+    return true;
   }
 
   float_t ProviderHydrophoneNode::fixedToFloat(uint32_t data)
