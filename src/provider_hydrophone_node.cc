@@ -88,6 +88,7 @@ namespace provider_hydrophone {
   void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
   {
     operation_mode current_mode =  operation_mode_;
+    bool mode_changed = false;
 
     // To block multiple change at the same time
     dynamic_reconfigure_mutex.lock();
@@ -98,6 +99,7 @@ namespace provider_hydrophone {
     {
       ROS_INFO_STREAM("New mode : " << std::to_string(config.Mode) << " Currrent mode : " << std::to_string(operation_mode_));
       changeMode((operation_mode)config.Mode);
+      mode_changed = true;
     }
     else if(gain_ != config.Gain)
     {
@@ -119,7 +121,7 @@ namespace provider_hydrophone {
       createAGCCommand((uint8_t)config.Active_AGC, (uint16_t)config.Signal_Threshold, (uint16_t)config.Limit_Signal_Threshold);
     }
 
-    if(current_mode != config.Mode) startAcquireData(current_mode);
+    if(!(mode_changed)) startAcquireData(current_mode);
     dynamic_reconfigure_mutex.unlock();
 
     ROS_WARN_STREAM("REMINDER : Change the rosparam with the new settings!!!");
@@ -336,6 +338,7 @@ namespace provider_hydrophone {
         send_string += " " + std::to_string(argv->at(i));
       }
       send_string += ENTER_COMMAND;
+      ROS_INFO_STREAM("CMD send : " << send_string);
       serialConnection_.transmit(send_string);
     }
     ros::Duration(1).sleep(); // Give time for the board receive and interpret data
