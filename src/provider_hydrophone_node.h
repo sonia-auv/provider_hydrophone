@@ -92,7 +92,6 @@ namespace provider_hydrophone {
         void sendCmd(std::string cmd, std::vector<uint16_t> *argv);
 
         bool isAcquiring();
-        void startAcquireData(operation_mode mode);
         void stopAcquireData();
         bool changeMode(operation_mode mode);
 
