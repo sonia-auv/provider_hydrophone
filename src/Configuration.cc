@@ -10,8 +10,8 @@ namespace provider_hydrophone
 
     Configuration::Configuration(const ros::NodeHandlePtr &nh)
         : nh_(nh),
-          gain(2),
-          snrThreshold(10),
+          gain(5),
+          snrThreshold(0),
           highSignalThreshold(35000),
           lowSignalThreshold(30000),
           agcActivation(false),

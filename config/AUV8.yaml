@@ -1,6 +1,6 @@
 #Constants informations
 #PGA
-/provider_hydrophone/hydrophone/gain: 4
+/provider_hydrophone/hydrophone/gain: 5
 
 #DOA
 /provider_hydrophone/hydrophone/snr_threshold : 0
