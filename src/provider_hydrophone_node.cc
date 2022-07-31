@@ -44,6 +44,8 @@ namespace provider_hydrophone {
   {
     stopAcquireData();
     setGain(configuration_.getGain());
+    createDOACommand(configuration_.getsnrThreshold(), configuration_.getLowSignalThreshold(), configuration_.getHighSignalThreshold());
+    createAGCCommand(configuration_.getAGCactivation(), configuration_.getAGCThreshold(), configuration_.getAGCMaxThreshold());
 
     // Subscribers
     pingPublisher_ = nh_->advertise<sonia_common::PingMsg>("/provider_hydrophone/ping", 100);
@@ -76,7 +78,7 @@ namespace provider_hydrophone {
   {
     ros::Rate r(10);  // 10 hz
 
-    startAcquireData(normalop);
+    changeMode(normalop);
 
     while (ros::ok()) 
     {
@@ -88,6 +90,7 @@ namespace provider_hydrophone {
   void ProviderHydrophoneNode::CallBackDynamicReconfigure(provider_hydrophone::HydroConfig &config, uint32_t level)
   {
     operation_mode current_mode =  operation_mode_;
+    bool mode_changed = false;
 
     // To block multiple change at the same time
     dynamic_reconfigure_mutex.lock();
@@ -98,6 +101,7 @@ namespace provider_hydrophone {
     {
       ROS_INFO_STREAM("New mode : " << std::to_string(config.Mode) << " Currrent mode : " << std::to_string(operation_mode_));
       changeMode((operation_mode)config.Mode);
+      mode_changed = true;
     }
     else if(gain_ != config.Gain)
     {
@@ -119,7 +123,7 @@ namespace provider_hydrophone {
       createAGCCommand((uint8_t)config.Active_AGC, (uint16_t)config.Signal_Threshold, (uint16_t)config.Limit_Signal_Threshold);
     }
 
-    if(current_mode != config.Mode) startAcquireData(current_mode);
+    if(!(mode_changed)) changeMode(current_mode);
     dynamic_reconfigure_mutex.unlock();
 
     ROS_WARN_STREAM("REMINDER : Change the rosparam with the new settings!!!");
@@ -336,6 +340,7 @@ namespace provider_hydrophone {
         send_string += " " + std::to_string(argv->at(i));
       }
       send_string += ENTER_COMMAND;
+      ROS_INFO_STREAM("CMD send : " << send_string);
       serialConnection_.transmit(send_string);
     }
     ros::Duration(1).sleep(); // Give time for the board receive and interpret data
@@ -344,20 +349,6 @@ namespace provider_hydrophone {
   bool ProviderHydrophoneNode::isAcquiring() 
   {
     return operation_mode_ != idle;
-  }
-
-  void ProviderHydrophoneNode::startAcquireData(operation_mode mode)
-  {    
-    ROS_DEBUG_STREAM("Start acquiring data");
-
-    if(isAcquiring()) return;
-
-    if(mode < normalop || mode > raw_data)
-    {
-      ROS_ERROR_STREAM("ERROR not going to acquire data."); 
-      return;
-    }
-    changeMode(mode);
   }
 
   void ProviderHydrophoneNode::stopAcquireData() 
@@ -502,7 +493,7 @@ namespace provider_hydrophone {
   {
     ROS_DEBUG_STREAM("Changing the mode for the AGC");
 
-    if(toggle != 0 || toggle != 1)
+    if(toggle != 0 && toggle != 1)
     {
       ROS_ERROR_STREAM("Error with the request to toggle the AGC");
       return false;
