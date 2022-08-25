@@ -92,17 +92,18 @@ namespace provider_hydrophone {
         void sendCmd(std::string cmd, std::vector<uint16_t> *argv);
 
         bool isAcquiring();
-        void startAcquireData(operation_mode mode);
         void stopAcquireData();
         bool changeMode(operation_mode mode);
 
         bool setGain(uint8_t gain);
 
+        bool createDOACommand(uint8_t snr, uint16_t lowth, uint16_t highth);
         void createDOACommand();
         bool setSNRThreshold(uint8_t threshold);
         bool setSignalLowThreshold(uint16_t threshold);
         bool setSignalHighThreshold(uint16_t threshold);
 
+        bool createAGCCommand(uint8_t toggle, uint16_t signalth, uint16_t limitth);
         void createAGCCommand();
         bool setAGCToggle(uint8_t toggle);
         bool setSignalThreshold(uint16_t threshold);
@@ -146,7 +147,7 @@ namespace provider_hydrophone {
         const std::string OPERATION_CMD = "op";
         const std::string PGA_CMD = "pga";
         const std::string DOA_CMD = "doa";
-        const std::string AFC_CMD = "agc";
+        const std::string AGC_CMD = "agc";
 
         const std::string EXIT_COMMAND = "q";
 
